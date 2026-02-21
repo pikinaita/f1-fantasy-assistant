@@ -35,30 +35,30 @@ const FIA_Agent = {
     if (race.sprint) { advice += "SPRINT WEEKEND - Prioridad maxima a regularidad. "; }
 
     var proposals = {
-      1:  "EQUIPO IDEAL: Leclerc (Ferrari), Russell (Mercedes), Antonelli (Mercedes), Gasly (Alpine), Bearman (Haas). Constructor: Ferrari. Superioridad en tandas largas.",
-      2:  "China: Mantener equipo. Ferrari fuerte en circuitos tecnicos. Evaluar Verstappen si Red Bull mejora.",
-      3:  "Japon: Circuito de alta velocidad favorece Ferrari/Mercedes. Leclerc clave.",
-      4:  "Bahrain: Calor perjudica neumaticos. Russell y Antonelli en forma.",
-      5:  "Arabia Saudi: Circuito rapido, Ferrari sigue fuerte. Revisar Alpine.",
-      6:  "Miami: Sprint - equipo estable. Miami favorece overtaking, Gasly puede puntuar bien.",
-      7:  "Canada: Montreal tecnico, favor Leclerc. Revisar si Hamilton mejora en Mercedes.",
-      8:  "Monaco: Street circuit - Leclerc IMPRESCINDIBLE. Bearman puede sorprender.",
-      9:  "Espana: Circuito equilibrado. Si Red Bull ha mejorado, considerar Verstappen.",
-      10: "Austria: Circuito rapido. Ferrari y Mercedes siguen dominando.",
-      11: "Gran Bretana: Silverstone, velocidad pura. Russell en casa - considerar.",
-      12: "Belgica: Spa, alta velocidad. Leclerc y Russell opciones top.",
-      13: "Hungria: Circuito lento, Ferrari solido. Evaluar rendimiento de mitad de temporada.",
-      14: "Paises Bajos: Zandvoort, circuito tecnico. Analizar clasificacion previa.",
-      15: "Italia: Monza, motor clave. Ferrari en casa - doble rendimiento.",
-      16: "Madrid: Nuevo trazado. Informacion limitada, mantener equipo solido.",
-      17: "Azerbaijan: Baku, circuito callejero. Riesgo alto, priorizar consistencia.",
-      18: "Singapur: Noche, calor extremo. Ferrari historicamente fuerte aqui.",
-      19: "USA Austin: Circuito favorito de Leclerc. Red Bull suele aparecer.",
-      20: "Mexico: Altitud perjudica motores. Reevaluar constructores.",
-      21: "Brasil: Interlagos impredecible. Lluvia posible - Russell bueno en mojado.",
-      22: "Las Vegas: Nuevo circuito, datos limitados. Equipo conservador.",
-      23: "Qatar: Sprint + Calor. Antonelli puede brillar.",
-      24: "Abu Dhabi: Ultima carrera. Yas Marina, Ferrari solido para cerrar."
+      1:  "EQUIPO IDEAL: Leclerc (Ferrari), Russell (Mercedes), Antonelli (Mercedes), Gasly (Alpine), Bearman (Haas). Constructores: Ferrari + Mercedes. Maxima potencia por vuelta.",
+      2:  "China: Mantener equipo. Ferrari y Mercedes fuertes en circuitos tecnicos. Constructores: Ferrari + Mercedes.",
+      3:  "Japon: Circuito de alta velocidad favorece Ferrari/Mercedes. Leclerc clave. Constructores: Ferrari + Mercedes.",
+      4:  "Bahrain: Calor perjudica neumaticos. Russell y Antonelli en forma. Constructores: Ferrari + Mercedes.",
+      5:  "Arabia Saudi: Circuito rapido, Ferrari sigue fuerte. Constructores: Ferrari + Mercedes.",
+      6:  "Miami: Sprint - equipo estable. Miami favorece overtaking. Constructores: Ferrari + Mercedes.",
+      7:  "Canada: Montreal tecnico, favor Leclerc. Constructores: Ferrari + Mercedes.",
+      8:  "Monaco: Street circuit - Leclerc IMPRESCINDIBLE. Bearman puede sorprender. Constructores: Ferrari + Haas.",
+      9:  "Espana: Circuito equilibrado. Si Red Bull ha mejorado, considerar Verstappen. Constructores: Ferrari + Red Bull.",
+      10: "Austria: Circuito rapido. Ferrari y Mercedes siguen dominando. Constructores: Ferrari + Mercedes.",
+      11: "Gran Bretana: Silverstone, velocidad pura. Russell en casa. Constructores: Mercedes + McLaren.",
+      12: "Belgica: Spa, alta velocidad. Leclerc y Russell opciones top. Constructores: Ferrari + Mercedes.",
+      13: "Hungria: Circuito lento, Ferrari solido. Constructores: Ferrari + Alpine.",
+      14: "Paises Bajos: Zandvoort, circuito tecnico. Constructores: Ferrari + Mercedes.",
+      15: "Italia: Monza, motor clave. Ferrari en casa. Constructores: Ferrari + Mercedes.",
+      16: "Madrid: Nuevo trazado. Equipo solido. Constructores: Ferrari + Mercedes.",
+      17: "Azerbaijan: Baku, circuito callejero. Priorizar consistencia. Constructores: Ferrari + Mercedes.",
+      18: "Singapur: Noche, calor extremo. Ferrari historicamente fuerte. Constructores: Ferrari + Mercedes.",
+      19: "USA Austin: Circuito favorito de Leclerc. Red Bull suele aparecer. Constructores: Ferrari + Red Bull.",
+      20: "Mexico: Altitud perjudica motores. Constructores: Ferrari + Mercedes.",
+      21: "Brasil: Interlagos impredecible. Russell bueno en mojado. Constructores: Mercedes + Ferrari.",
+      22: "Las Vegas: Nuevo circuito, datos limitados. Constructores: Ferrari + Mercedes.",
+      23: "Qatar: Sprint + Calor. Antonelli puede brillar. Constructores: Mercedes + Ferrari.",
+      24: "Abu Dhabi: Ultima carrera. Yas Marina. Constructores: Ferrari + Mercedes."
     };
 
     advice += proposals[race.round] || "Mantener equipo actual y evaluar resultados clasificacion.";
@@ -124,11 +124,11 @@ document.addEventListener('DOMContentLoaded', function() {
       if (!userTeam) {
         userTeam = {
           pilotos: ["Charles Leclerc", "George Russell", "Kimi Antonelli", "Pierre Gasly", "Oliver Bearman"],
-          constructor: "Ferrari",
+          constructores: ["Ferrari", "Mercedes"],
           creado: new Date().toISOString()
         };
         localStorage.setItem('f1Team', JSON.stringify(userTeam));
-        alert("Agente FIA: Equipo ideal configurado segun tests de pretemporada 2026. Abriendo Fantasy F1...");
+        alert("Agente FIA: Equipo ideal (con 2 constructores) configurado segun tests de pretemporada 2026. Abriendo Fantasy F1...");
         updateUI();
       }
       var goToFantasy = confirm("Abrir la web de Fantasy F1 para editar tu equipo? Si confirmas los cambios propuestos en el chat, Comet los realizara por ti.");
@@ -176,7 +176,7 @@ function updateUI() {
       display.innerHTML = '<p class="status-msg">Sin equipo configurado. Pulsa "Propuesta de equipo" para ver el ideal, o "Editar equipo" para configurarlo.</p>';
     } else {
       var html = '<div style="border:1px solid #444;padding:15px;border-radius:8px;background:#1a1a1a;">';
-      html += '<h3 style="color:#e10600;margin-top:0;">Constructor: ' + userTeam.constructor + '</h3>';
+      html += '<h3 style="color:#e10600;margin-top:0;">Constructores: ' + (userTeam.constructores ? userTeam.constructores.join(' + ') : userTeam.constructor) + '</h3>';
       html += '<ul style="list-style:none;padding:0;">';
       for (var i = 0; i < userTeam.pilotos.length; i++) {
         html += '<li style="margin-bottom:5px;padding:5px;border-bottom:1px solid #333;">&#127950; ' + userTeam.pilotos[i] + '</li>';
