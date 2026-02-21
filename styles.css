@@ -1,0 +1,332 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --f1-red: #e10600;
+  --f1-dark: #111;
+  --f1-card: #1a1a1a;
+  --f1-border: #2a2a2a;
+  --f1-text: #f5f5f5;
+  --f1-muted: #888;
+  --f1-accent: #ff8c00;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--f1-dark);
+  color: var(--f1-text);
+  min-height: 100vh;
+}
+
+header {
+  background: var(--f1-red);
+  padding: 1rem 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.f1-logo {
+  font-size: 2rem;
+  font-weight: 900;
+  color: white;
+  letter-spacing: -2px;
+  font-style: italic;
+  line-height: 1;
+}
+
+header h1 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: white;
+  line-height: 1.2;
+}
+
+.subtitle {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.8);
+}
+
+main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.card {
+  background: var(--f1-card);
+  border: 1px solid var(--f1-border);
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+.card h2 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  color: var(--f1-red);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.info-text {
+  font-size: 0.85rem;
+  color: var(--f1-muted);
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
+}
+
+.countdown {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--f1-accent);
+  margin-top: 0.5rem;
+  font-variant-numeric: tabular-nums;
+}
+
+#next-race-info {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+#next-race-info strong {
+  color: var(--f1-red);
+  font-size: 1.1rem;
+}
+
+.btn-primary {
+  background: var(--f1-red);
+  color: white;
+  border: none;
+  padding: 0.65rem 1.25rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.btn-primary:hover {
+  background: #b00500;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--f1-red);
+  border: 2px solid var(--f1-red);
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-top: 0.75rem;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  background: var(--f1-red);
+  color: white;
+}
+
+.status-msg {
+  margin-top: 0.6rem;
+  font-size: 0.8rem;
+  color: var(--f1-muted);
+  line-height: 1.4;
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.team-card {
+  background: var(--f1-border);
+  border-radius: 8px;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.team-card .role {
+  font-size: 0.65rem;
+  color: var(--f1-accent);
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.team-card .name {
+  font-weight: 600;
+  color: var(--f1-text);
+}
+
+.team-card .price {
+  color: var(--f1-muted);
+  font-size: 0.75rem;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+th {
+  background: rgba(225,6,0,0.15);
+  color: var(--f1-red);
+  padding: 0.5rem 0.6rem;
+  text-align: left;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+td {
+  padding: 0.45rem 0.6rem;
+  border-bottom: 1px solid var(--f1-border);
+  color: var(--f1-text);
+  white-space: nowrap;
+}
+
+tr:hover td {
+  background: rgba(255,255,255,0.03);
+}
+
+.race-past {
+  opacity: 0.4;
+}
+
+.race-next td:first-child {
+  border-left: 3px solid var(--f1-red);
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.badge-sprint {
+  background: rgba(255,140,0,0.2);
+  color: var(--f1-accent);
+  border: 1px solid rgba(255,140,0,0.3);
+}
+
+.badge-upcoming {
+  background: rgba(225,6,0,0.15);
+  color: var(--f1-red);
+  border: 1px solid rgba(225,6,0,0.3);
+}
+
+.badge-past {
+  background: rgba(255,255,255,0.05);
+  color: var(--f1-muted);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.strategy-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.6rem;
+}
+
+.chip-card {
+  background: var(--f1-border);
+  border-radius: 8px;
+  padding: 0.75rem;
+  text-align: center;
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.chip-icon {
+  display: block;
+  font-size: 1.2rem;
+  font-weight: 900;
+  color: var(--f1-accent);
+  margin-bottom: 0.3rem;
+  font-style: italic;
+}
+
+.chip-card strong {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--f1-text);
+  margin-bottom: 0.2rem;
+}
+
+.chip-card p {
+  color: var(--f1-muted);
+  font-size: 0.7rem;
+}
+
+.links-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.link-btn {
+  background: var(--f1-border);
+  color: var(--f1-text);
+  text-decoration: none;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s;
+  border: 1px solid var(--f1-border);
+}
+
+.link-btn:hover {
+  background: var(--f1-red);
+  border-color: var(--f1-red);
+  color: white;
+}
+
+footer {
+  text-align: center;
+  padding: 1.5rem;
+  font-size: 0.75rem;
+  color: var(--f1-muted);
+}
+
+footer a {
+  color: var(--f1-red);
+  text-decoration: none;
+}
+
+@media (max-width: 600px) {
+  .strategy-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .team-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
