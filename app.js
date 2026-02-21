@@ -52,7 +52,7 @@ const FIA_Agent = {
       15: "Italia: Monza, motor clave. Ferrari en casa - doble rendimiento.",
       16: "Madrid: Nuevo trazado. Informacion limitada, mantener equipo solido.",
       17: "Azerbaijan: Baku, circuito callejero. Riesgo alto, priorizar consistencia.",
-      18: "Singapur: Noche, calor extremo. Ferrari históricamente fuerte aqui.",
+      18: "Singapur: Noche, calor extremo. Ferrari historicamente fuerte aqui.",
       19: "USA Austin: Circuito favorito de Leclerc. Red Bull suele aparecer.",
       20: "Mexico: Altitud perjudica motores. Reevaluar constructores.",
       21: "Brasil: Interlagos impredecible. Lluvia posible - Russell bueno en mojado.",
@@ -74,9 +74,7 @@ const FIA_Agent = {
         break;
       }
     }
-    if (nextRace) {
-      return this.analyzeRace(nextRace);
-    }
+    if (nextRace) { return this.analyzeRace(nextRace); }
     return "Fin de temporada 2026. Gran trabajo!";
   },
 
@@ -97,6 +95,11 @@ const FIA_Agent = {
 
 var userTeam = JSON.parse(localStorage.getItem('f1Team')) || null;
 
+function closeModalFn() {
+  var modal = document.getElementById('team-modal');
+  if (modal) { modal.style.display = 'none'; }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   renderCalendar();
   updateUI();
@@ -104,15 +107,14 @@ document.addEventListener('DOMContentLoaded', function() {
   var proposeBtn = document.getElementById('propose-team-btn');
   var editBtn = document.getElementById('edit-team-btn');
   var modal = document.getElementById('team-modal');
-  var closeModal = document.getElementById('close-modal');
+  var closeModalBtn = document.getElementById('close-modal');
   var confirmBtn = document.getElementById('confirm-changes-btn');
+  var cancelModalBtn = document.getElementById('cancel-modal-btn');
 
   if (proposeBtn) {
     proposeBtn.addEventListener('click', function() {
       var proposalText = document.getElementById('proposal-text');
-      if (proposalText) {
-        proposalText.innerText = FIA_Agent.getProposal();
-      }
+      if (proposalText) { proposalText.innerText = FIA_Agent.getProposal(); }
       if (modal) { modal.style.display = 'block'; }
     });
   }
@@ -130,21 +132,16 @@ document.addEventListener('DOMContentLoaded', function() {
         updateUI();
       }
       var goToFantasy = confirm("Abrir la web de Fantasy F1 para editar tu equipo? Si confirmas los cambios propuestos en el chat, Comet los realizara por ti.");
-      if (goToFantasy) {
-        window.open("https://fantasy.formula1.com/en/my-team", "_blank");
-      }
+      if (goToFantasy) { window.open("https://fantasy.formula1.com/en/my-team", "_blank"); }
     });
   }
 
-  if (closeModal) {
-    closeModal.addEventListener('click', function() {
-      if (modal) { modal.style.display = 'none'; }
-    });
-  }
+  if (closeModalBtn) { closeModalBtn.addEventListener('click', closeModalFn); }
+  if (cancelModalBtn) { cancelModalBtn.addEventListener('click', closeModalFn); }
 
   if (confirmBtn) {
     confirmBtn.addEventListener('click', function() {
-      if (modal) { modal.style.display = 'none'; }
+      closeModalFn();
       alert("Dile a Comet en el chat: 'Realiza los cambios propuestos en Fantasy F1'. Comet abrira la web y hara los cambios si confirmas.");
     });
   }
@@ -156,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function() {
         Notification.requestPermission().then(function(p) {
           if (p === 'granted') {
             var statusEl = document.getElementById('notifications-status');
-            if (statusEl) { statusEl.innerText = "Activadas"; }
+            if (statusEl) { statusEl.innerText = "Notificaciones activadas"; }
             new Notification("FIA Agent - F1 Fantasy", {
               body: FIA_Agent.getReminders(),
               icon: "icon-192.png"
@@ -172,9 +169,7 @@ function updateUI() {
   var display = document.getElementById('team-display');
   var info = document.getElementById('next-race-info');
 
-  if (info) {
-    info.innerText = "Analisis FIA: " + FIA_Agent.getReminders();
-  }
+  if (info) { info.innerText = "Analisis FIA: " + FIA_Agent.getReminders(); }
 
   if (display) {
     if (!userTeam) {
