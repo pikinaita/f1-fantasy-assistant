@@ -29,21 +29,19 @@ const FIA_Agent = {
   name: "Comisario Fantasy",
   analysisDate: "2026-02-21",
   currentIntelligence: "Tests de Sakhir 2026: Ferrari y Mercedes lideran. Leclerc y Antonelli los mas rapidos. Red Bull incognita con energia. McLaren solido. Haas sorpresa.",
-
   analyzeRace: function(race) {
     var advice = "FIA Intel [" + this.analysisDate + "]: GP " + race.gp + " (" + race.city + "). ";
     if (race.sprint) { advice += "SPRINT WEEKEND - Prioridad maxima a regularidad. "; }
-
     var proposals = {
-      1:  "EQUIPO IDEAL: Leclerc (Ferrari), Russell (Mercedes), Antonelli (Mercedes), Gasly (Alpine), Bearman (Haas). Constructores: Ferrari + Mercedes. Maxima potencia por vuelta.",
-      2:  "China: Mantener equipo. Ferrari y Mercedes fuertes en circuitos tecnicos. Constructores: Ferrari + Mercedes.",
-      3:  "Japon: Circuito de alta velocidad favorece Ferrari/Mercedes. Leclerc clave. Constructores: Ferrari + Mercedes.",
-      4:  "Bahrain: Calor perjudica neumaticos. Russell y Antonelli en forma. Constructores: Ferrari + Mercedes.",
-      5:  "Arabia Saudi: Circuito rapido, Ferrari sigue fuerte. Constructores: Ferrari + Mercedes.",
-      6:  "Miami: Sprint - equipo estable. Miami favorece overtaking. Constructores: Ferrari + Mercedes.",
-      7:  "Canada: Montreal tecnico, favor Leclerc. Constructores: Ferrari + Mercedes.",
-      8:  "Monaco: Street circuit - Leclerc IMPRESCINDIBLE. Bearman puede sorprender. Constructores: Ferrari + Haas.",
-      9:  "Espana: Circuito equilibrado. Si Red Bull ha mejorado, considerar Verstappen. Constructores: Ferrari + Red Bull.",
+      1: "EQUIPO IDEAL: Leclerc (Ferrari), Russell (Mercedes), Antonelli (Mercedes), Gasly (Alpine), Bearman (Haas). Constructores: Ferrari + Mercedes.",
+      2: "China: Mantener equipo. Ferrari y Mercedes fuertes en circuitos tecnicos. Constructores: Ferrari + Mercedes.",
+      3: "Japon: Circuito de alta velocidad favorece Ferrari/Mercedes. Leclerc clave. Constructores: Ferrari + Mercedes.",
+      4: "Bahrain: Calor perjudica neumaticos. Russell y Antonelli en forma. Constructores: Ferrari + Mercedes.",
+      5: "Arabia Saudi: Circuito rapido, Ferrari sigue fuerte. Constructores: Ferrari + Mercedes.",
+      6: "Miami: Sprint - equipo estable. Miami favorece overtaking. Constructores: Ferrari + Mercedes.",
+      7: "Canada: Montreal tecnico, favor Leclerc. Constructores: Ferrari + Mercedes.",
+      8: "Monaco: Street circuit - Leclerc IMPRESCINDIBLE. Bearman puede sorprender. Constructores: Ferrari + Haas.",
+      9: "Espana: Circuito equilibrado. Si Red Bull ha mejorado, considerar Verstappen. Constructores: Ferrari + Red Bull.",
       10: "Austria: Circuito rapido. Ferrari y Mercedes siguen dominando. Constructores: Ferrari + Mercedes.",
       11: "Gran Bretana: Silverstone, velocidad pura. Russell en casa. Constructores: Mercedes + McLaren.",
       12: "Belgica: Spa, alta velocidad. Leclerc y Russell opciones top. Constructores: Ferrari + Mercedes.",
@@ -60,11 +58,9 @@ const FIA_Agent = {
       23: "Qatar: Sprint + Calor. Antonelli puede brillar. Constructores: Mercedes + Ferrari.",
       24: "Abu Dhabi: Ultima carrera. Yas Marina. Constructores: Ferrari + Mercedes."
     };
-
     advice += proposals[race.round] || "Mantener equipo actual y evaluar resultados clasificacion.";
     return advice;
   },
-
   getReminders: function() {
     var today = new Date();
     var nextRace = null;
@@ -77,7 +73,6 @@ const FIA_Agent = {
     if (nextRace) { return this.analyzeRace(nextRace); }
     return "Fin de temporada 2026. Gran trabajo!";
   },
-
   getProposal: function(race) {
     if (!race) {
       var today = new Date();
@@ -121,28 +116,32 @@ document.addEventListener('DOMContentLoaded', function() {
 
   if (editBtn) {
     editBtn.addEventListener('click', function() {
-      if (!userTeam) {
-        userTeam = {
-          pilotos: ["Charles Leclerc", "George Russell", "Kimi Antonelli", "Pierre Gasly", "Oliver Bearman"],
-          constructores: ["Ferrari", "Mercedes"],
-          creado: new Date().toISOString()
-        };
-        localStorage.setItem('f1Team', JSON.stringify(userTeam));
-        alert("Agente FIA: Equipo ideal (con 2 constructores) configurado segun tests de pretemporada 2026. Abriendo Fantasy F1...");
-        updateUI();
-      }
-      var goToFantasy = confirm("Abrir la web de Fantasy F1 para editar tu equipo? Si confirmas los cambios propuestos en el chat, Comet los realizara por ti.");
-      if (goToFantasy) { window.open("https://fantasy.formula1.com/en/my-team", "_blank"); }
+      userTeam = {
+        pilotos: ["Charles Leclerc", "George Russell", "Kimi Antonelli", "Pierre Gasly", "Oliver Bearman"],
+        constructores: ["Ferrari", "Mercedes"],
+        creado: new Date().toISOString()
+      };
+      localStorage.setItem('f1Team', JSON.stringify(userTeam));
+      alert("Agente FIA: Equipo configurado con 2 constructores (Ferrari + Mercedes). Abriendo Fantasy F1...");
+      updateUI();
+      window.open("https://fantasy.formula1.com/en/my-team", "_blank");
     });
   }
 
   if (closeModalBtn) { closeModalBtn.addEventListener('click', closeModalFn); }
   if (cancelModalBtn) { cancelModalBtn.addEventListener('click', closeModalFn); }
-
+  
   if (confirmBtn) {
     confirmBtn.addEventListener('click', function() {
+      userTeam = {
+        pilotos: ["Charles Leclerc", "George Russell", "Kimi Antonelli", "Pierre Gasly", "Oliver Bearman"],
+        constructores: ["Ferrari", "Mercedes"],
+        creado: new Date().toISOString()
+      };
+      localStorage.setItem('f1Team', JSON.stringify(userTeam));
+      updateUI();
       closeModalFn();
-      alert("Dile a Comet en el chat: 'Realiza los cambios propuestos en Fantasy F1'. Comet abrira la web y hara los cambios si confirmas.");
+      alert("Equipo actualizado localmente a 2 constructores. Ahora Comet puede realizar los cambios en la web oficial si lo pides.");
     });
   }
 
@@ -173,13 +172,14 @@ function updateUI() {
 
   if (display) {
     if (!userTeam) {
-      display.innerHTML = '<p class="status-msg">Sin equipo configurado. Pulsa "Propuesta de equipo" para ver el ideal, o "Editar equipo" para configurarlo.</p>';
+      display.innerHTML = '<p class="status-msg">Sin equipo configurado. Pulsa "Propuesta de equipo" para ver el ideal.</p>';
     } else {
+      var consText = userTeam.constructores ? userTeam.constructores.join(' + ') : (userTeam.constructor || "No definido");
       var html = '<div style="border:1px solid #444;padding:15px;border-radius:8px;background:#1a1a1a;">';
-      html += '<h3 style="color:#e10600;margin-top:0;">Constructores: ' + (userTeam.constructores ? userTeam.constructores.join(' + ') : userTeam.constructor) + '</h3>';
+      html += '<h3 style="color:#e10600;margin-top:0;">Constructores: ' + consText + '</h3>';
       html += '<ul style="list-style:none;padding:0;">';
       for (var i = 0; i < userTeam.pilotos.length; i++) {
-        html += '<li style="margin-bottom:5px;padding:5px;border-bottom:1px solid #333;">&#127950; ' + userTeam.pilotos[i] + '</li>';
+        html += '<li style="margin-bottom:5px;padding:5px;border-bottom:1px solid #333;">🏎 ' + userTeam.pilotos[i] + '</li>';
       }
       html += '</ul></div>';
       display.innerHTML = html;
