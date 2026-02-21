@@ -27,44 +27,67 @@ const f1Calendar2026 = [
 
 const FIA_Agent = {
   name: "Comisario Fantasy",
+  analysisDate: "2026-02-21",
+  currentIntelligence: "Basado en los tests de Sakhir (febrero 2026), Ferrari y Mercedes lideran en rendimiento puro. Leclerc y Antonelli han sido los más rápidos. Red Bull es la incógnita con mejor gestión de energía. McLaren sólido pero un paso por detrás. Haas es la sorpresa de la zona media.",
+  
   analyzeRace: function(race) {
-    let advice = "Analizando el GP de " + race.gp + "... ";
-    if (race.sprint) advice += "¡Ojo! Es fin de semana de SPRINT.";
-    if (race.gp === "Monaco" || race.gp === "Singapore") {
-      advice += " Circuito urbano: prioriza clasificación.";
-    } else if (race.gp === "Italy" || race.gp === "Azerbaijan") {
-      advice += " Circuito veloz: busca potencia.";
+    let advice = "FIA Intel [" + this.analysisDate + "]: GP " + race.gp + ". ";
+    if (race.sprint) advice += "¡SPRINT! Máxima prioridad a regularidad. ";
+    
+    // Lógica avanzada de propuesta de cambios
+    if (race.round === 1) {
+      advice += "EQUIPO IDEAL INICIAL: Leclerc (Ferrari), Russell (Mercedes), Antonelli (Mercedes), Gasly (Alpine), Bearman (Haas). Constructor: Ferrari.";
     } else {
-      advice += " Circuito equilibrado.";
+      advice += "Propuesta de cambio: Evaluar rendimiento de Red Bull vs Ferrari tras Sakhir.";
     }
     return advice;
   },
+
   getReminders: function() {
     const today = new Date();
     const nextRace = f1Calendar2026.find(r => new Date(r.date) > today);
     if (nextRace) {
-      return "Próximo: " + nextRace.gp + " (" + nextRace.date + "). " + this.analyzeRace(nextRace);
+      return this.analyzeRace(nextRace);
     }
-    return "No hay más carreras programadas para 2026.";
+    return "Fin de temporada 2026.";
   }
 };
 
+let userTeam = JSON.parse(localStorage.getItem('f1Team')) || null;
+
 document.addEventListener('DOMContentLoaded', () => {
   renderCalendar();
-  updateNextRace();
+  updateUI();
   
+  const editBtn = document.getElementById('edit-team-btn');
+  if (editBtn) {
+    editBtn.addEventListener('click', () => {
+      // Si no hay equipo, creamos el ideal
+      if (!userTeam) {
+        userTeam = {
+          pilotos: ["Charles Leclerc", "George Russell", "Kimi Antonelli", "Pierre Gasly", "Oliver Bearman"],
+          constructor: "Ferrari",
+          creado: new Date().toISOString()
+        };
+        localStorage.setItem('f1Team', JSON.stringify(userTeam));
+        alert("¡Agente FIA actuando! Al no tener equipo, he configurado el EQUIPO IDEAL basado en los tests de pretemporada 2026.");
+      } else {
+        const modal = document.getElementById('team-modal');
+        if (modal) modal.style.display = 'block';
+      }
+      updateUI();
+    });
+  }
+
+  // Notificaciones
   const notifyBtn = document.getElementById('enable-notifications');
   if (notifyBtn) {
     notifyBtn.addEventListener('click', () => {
       if ('Notification' in window) {
-        Notification.requestPermission().then(permission => {
-          const status = document.getElementById('notifications-status');
-          if (permission === 'granted') {
-            status.innerText = "✅ Notificaciones activadas.";
-            new Notification("FIA Agent: F1 Fantasy", {
-              body: FIA_Agent.getReminders(),
-              icon: "https://www.formula1.com/etc/designs/fom-website/images/f1_logo.png"
-            });
+        Notification.requestPermission().then(p => {
+          if (p === 'granted') {
+            document.getElementById('notifications-status').innerText = "✅ Activadas";
+            new Notification("FIA Agent", { body: FIA_Agent.getReminders() });
           }
         });
       }
@@ -72,17 +95,30 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-function renderCalendar() {
-  const tableBody = document.getElementById('calendar-body');
-  if (!tableBody) return;
-  f1Calendar2026.forEach(race => {
-    const row = document.createElement('tr');
-    row.innerHTML = "<td>" + race.round + "</td><td>" + race.gp + "</td><td>" + race.date + "</td><td>" + (race.sprint ? '✅' : '❌') + "</td><td>" + (new Date(race.date) < new Date() ? 'Finalizado' : 'Pendiente') + "</td>";
-    tableBody.appendChild(row);
-  });
+function updateUI() {
+  const display = document.getElementById('team-display');
+  const info = document.getElementById('next-race-info');
+  
+  if (info) info.innerText = FIA_Agent.getReminders();
+  
+  if (display) {
+    if (!userTeam) {
+      display.innerHTML = '<p class="status-msg">Sin equipo configurado. Pulsa Editar para generar el Equipo Ideal.</p>';
+    } else {
+      display.innerHTML = '<h3>' + userTeam.constructor + '</h3><ul>' + 
+        userTeam.pilotos.map(p => '<li>' + p + '</li>').join('') + '</ul>';
+    }
+  }
 }
 
-function updateNextRace() {
-  const info = document.getElementById('next-race-info');
-  if (info) info.innerText = FIA_Agent.getReminders();
+function renderCalendar() {
+  const body = document.getElementById('calendar-body');
+  if (!body) return;
+  body.innerHTML = '';
+  f1Calendar2026.forEach(race => {
+    const row = document.createElement('tr');
+    const isPast = new Date(race.date) < new Date();
+    row.innerHTML = "<td>" + race.round + "</td><td>" + race.gp + "</td><td>" + race.date + "</td><td>" + (race.sprint ? '✅' : '❌') + "</td><td>" + (isPast ? 'Finalizado' : 'Pendiente') + "</td>";
+    body.appendChild(row);
+  });
 }
