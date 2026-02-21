@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>F1 Fantasy Assistant 2026</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#e10600" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="F1 Fantasy" />
+  <link rel="apple-touch-icon" href="icon-192.svg" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <span class="f1-logo">F1</span>
+      <div>
+        <h1>Fantasy Assistant 2026</h1>
+        <p class="subtitle">Gestiona tu equipo gran premio a gran premio</p>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Proxima carrera -->
+    <section id="next-race-section" class="card">
+      <h2>Proxima carrera</h2>
+      <div id="next-race-info"></div>
+      <div id="countdown" class="countdown"></div>
+    </section>
+
+    <!-- Notificaciones -->
+    <section class="card">
+      <h2>Notificaciones push</h2>
+      <p class="info-text">Activa las notificaciones para recibir avisos automaticos antes de cada Gran Premio.</p>
+      <button id="enable-notifications" class="btn-primary">Activar notificaciones</button>
+      <p id="notifications-status" class="status-msg"></p>
+    </section>
+
+    <!-- Equipo actual -->
+    <section class="card">
+      <h2>Mi equipo actual</h2>
+      <div id="team-display" class="team-grid"></div>
+      <button id="edit-team-btn" class="btn-secondary">Editar equipo</button>
+    </section>
+
+    <!-- Calendario -->
+    <section class="card">
+      <h2>Calendario F1 2026</h2>
+      <p class="info-text">Fechas de carrera y recordatorios programados.</p>
+      <div class="table-wrapper">
+        <table id="calendar-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Gran Premio</th>
+              <th>Carrera</th>
+              <th>Sprint</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="calendar-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Estrategia -->
+    <section class="card">
+      <h2>Estrategia DRS &amp; Chips</h2>
+      <div class="strategy-grid">
+        <div class="chip-card">
+          <span class="chip-icon">x2</span>
+          <strong>DRS Boost</strong>
+          <p>Usa en tu piloto mas fuerte del finde</p>
+        </div>
+        <div class="chip-card">
+          <span class="chip-icon">LM</span>
+          <strong>Limitless</strong>
+          <p>Guarda para dominio claro de top equipos</p>
+        </div>
+        <div class="chip-card">
+          <span class="chip-icon">WC</span>
+          <strong>Wildcard</strong>
+          <p>Usa cuando el orden de fuerzas cambie</p>
+        </div>
+        <div class="chip-card">
+          <span class="chip-icon">x3</span>
+          <strong>Extra DRS</strong>
+          <p>2 pilotos con boost el mismo finde</p>
+        </div>
+        <div class="chip-card">
+          <span class="chip-icon">0-</span>
+          <strong>No Negative</strong>
+          <p>Ideal en circuitos con alto riesgo DNF</p>
+        </div>
+        <div class="chip-card">
+          <span class="chip-icon">FF</span>
+          <strong>Final Fix</strong>
+          <p>Cambio entre qualy y carrera sin penalizar</p>
+        </div>
+        <div class="chip-card">
+          <span class="chip-icon">AP</span>
+          <strong>Autopilot</strong>
+          <p>DRS automatico al mejor piloto del finde</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Links rapidos -->
+    <section class="card">
+      <h2>Accesos rapidos</h2>
+      <div class="links-grid">
+        <a href="https://fantasy.formula1.com" target="_blank" rel="noopener" class="link-btn">F1 Fantasy Oficial</a>
+        <a href="https://www.formula1.com/en/racing/2026" target="_blank" rel="noopener" class="link-btn">Calendario F1 2026</a>
+        <a href="https://www.formula1.com" target="_blank" rel="noopener" class="link-btn">Formula 1 Web</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>F1 Fantasy Assistant 2026 &bull; pikinaita &bull; <a href="https://github.com/pikinaita/f1-fantasy-assistant" target="_blank">GitHub</a></p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
