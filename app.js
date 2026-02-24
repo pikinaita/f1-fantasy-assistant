@@ -27,38 +27,16 @@ const f1Calendar2026 = [
 
 const FIA_Agent = {
   name: "Comisario Fantasy",
-  analysisDate: "2026-02-21",
-  currentIntelligence: "Tests de Sakhir 2026: Ferrari y Mercedes lideran. Leclerc y Antonelli los mas rapidos. Red Bull incognita con energia. McLaren solido. Haas sorpresa.",
+  analysisDate: "2026-02-24",
+  currentIntelligence: "Juego Activo: 100M presupuesto, 5 pilotos, 2 constructores. Mercedes ($28M) y Ferrari ($22M) lideran. Cadillac ($6.5M) es clave para el presupuesto.",
   analyzeRace: function(race) {
     var advice = "FIA Intel [" + this.analysisDate + "]: GP " + race.gp + " (" + race.city + "). ";
-    if (race.sprint) { advice += "SPRINT WEEKEND - Prioridad maxima a regularidad. "; }
+    if (race.sprint) { advice += "SPRINT - Penalización DNF -10 pts. "; }
     var proposals = {
-      1: "EQUIPO IDEAL: Leclerc (Ferrari), Russell (Mercedes), Antonelli (Mercedes), Gasly (Alpine), Bearman (Haas). Constructores: Ferrari + Mercedes.",
-      2: "China: Mantener equipo. Ferrari y Mercedes fuertes en circuitos tecnicos. Constructores: Ferrari + Mercedes.",
-      3: "Japon: Circuito de alta velocidad favorece Ferrari/Mercedes. Leclerc clave. Constructores: Ferrari + Mercedes.",
-      4: "Bahrain: Calor perjudica neumaticos. Russell y Antonelli en forma. Constructores: Ferrari + Mercedes.",
-      5: "Arabia Saudi: Circuito rapido, Ferrari sigue fuerte. Constructores: Ferrari + Mercedes.",
-      6: "Miami: Sprint - equipo estable. Miami favorece overtaking. Constructores: Ferrari + Mercedes.",
-      7: "Canada: Montreal tecnico, favor Leclerc. Constructores: Ferrari + Mercedes.",
-      8: "Monaco: Street circuit - Leclerc IMPRESCINDIBLE. Bearman puede sorprender. Constructores: Ferrari + Haas.",
-      9: "Espana: Circuito equilibrado. Si Red Bull ha mejorado, considerar Verstappen. Constructores: Ferrari + Red Bull.",
-      10: "Austria: Circuito rapido. Ferrari y Mercedes siguen dominando. Constructores: Ferrari + Mercedes.",
-      11: "Gran Bretana: Silverstone, velocidad pura. Russell en casa. Constructores: Mercedes + McLaren.",
-      12: "Belgica: Spa, alta velocidad. Leclerc y Russell opciones top. Constructores: Ferrari + Mercedes.",
-      13: "Hungria: Circuito lento, Ferrari solido. Constructores: Ferrari + Alpine.",
-      14: "Paises Bajos: Zandvoort, circuito tecnico. Constructores: Ferrari + Mercedes.",
-      15: "Italia: Monza, motor clave. Ferrari en casa. Constructores: Ferrari + Mercedes.",
-      16: "Madrid: Nuevo trazado. Equipo solido. Constructores: Ferrari + Mercedes.",
-      17: "Azerbaijan: Baku, circuito callejero. Priorizar consistencia. Constructores: Ferrari + Mercedes.",
-      18: "Singapur: Noche, calor extremo. Ferrari historicamente fuerte. Constructores: Ferrari + Mercedes.",
-      19: "USA Austin: Circuito favorito de Leclerc. Red Bull suele aparecer. Constructores: Ferrari + Red Bull.",
-      20: "Mexico: Altitud perjudica motores. Constructores: Ferrari + Mercedes.",
-      21: "Brasil: Interlagos impredecible. Russell bueno en mojado. Constructores: Mercedes + Ferrari.",
-      22: "Las Vegas: Nuevo circuito, datos limitados. Constructores: Ferrari + Mercedes.",
-      23: "Qatar: Sprint + Calor. Antonelli puede brillar. Constructores: Mercedes + Ferrari.",
-      24: "Abu Dhabi: Ultima carrera. Yas Marina. Constructores: Ferrari + Mercedes."
+      1: "EQUIPO AUSTRALIA: Leclerc ($21.5M), Bearman ($7M), Gasly ($8M), Ocon ($7M), Hadjar ($3M). Constructores: Ferrari ($22M) + Mercedes ($28M). Presupuesto total: $96.5M.",
+      2: "China: Evaluar rendimiento de Cadillac. Mantener Ferrari/Mercedes si dominan.",
     };
-    advice += proposals[race.round] || "Mantener equipo actual y evaluar resultados clasificacion.";
+    advice += proposals[race.round] || "Mantener equipo y evaluar clasificación.";
     return advice;
   },
   getReminders: function() {
@@ -71,7 +49,7 @@ const FIA_Agent = {
       }
     }
     if (nextRace) { return this.analyzeRace(nextRace); }
-    return "Fin de temporada 2026. Gran trabajo!";
+    return "Fin de temporada 2026.";
   },
   getProposal: function(race) {
     if (!race) {
@@ -117,12 +95,12 @@ document.addEventListener('DOMContentLoaded', function() {
   if (editBtn) {
     editBtn.addEventListener('click', function() {
       userTeam = {
-        pilotos: ["Charles Leclerc", "George Russell", "Kimi Antonelli", "Pierre Gasly", "Oliver Bearman"],
+        pilotos: ["Charles Leclerc", "Oliver Bearman", "Pierre Gasly", "Esteban Ocon", "Isack Hadjar"],
         constructores: ["Ferrari", "Mercedes"],
         creado: new Date().toISOString()
       };
       localStorage.setItem('f1Team', JSON.stringify(userTeam));
-      alert("Agente FIA: Equipo configurado con 2 constructores (Ferrari + Mercedes). Abriendo Fantasy F1...");
+      alert("Agente FIA: Alineación Australia 2026 ($96.5M) cargada. Abriendo Fantasy F1...");
       updateUI();
       window.open("https://fantasy.formula1.com/en/my-team", "_blank");
     });
@@ -134,14 +112,14 @@ document.addEventListener('DOMContentLoaded', function() {
   if (confirmBtn) {
     confirmBtn.addEventListener('click', function() {
       userTeam = {
-        pilotos: ["Charles Leclerc", "George Russell", "Kimi Antonelli", "Pierre Gasly", "Oliver Bearman"],
+        pilotos: ["Charles Leclerc", "Oliver Bearman", "Pierre Gasly", "Esteban Ocon", "Isack Hadjar"],
         constructores: ["Ferrari", "Mercedes"],
         creado: new Date().toISOString()
       };
       localStorage.setItem('f1Team', JSON.stringify(userTeam));
       updateUI();
       closeModalFn();
-      alert("Equipo actualizado localmente a 2 constructores. Ahora Comet puede realizar los cambios en la web oficial si lo pides.");
+      alert("Equipo actualizado para Australia 2026.");
     });
   }
 
@@ -172,7 +150,7 @@ function updateUI() {
 
   if (display) {
     if (!userTeam) {
-      display.innerHTML = '<p class="status-msg">Sin equipo configurado. Pulsa "Propuesta de equipo" para ver el ideal.</p>';
+      display.innerHTML = '<p class="status-msg">Sin equipo configurado. Pulsa "Propuesta de equipo".</p>';
     } else {
       var consText = userTeam.constructores ? userTeam.constructores.join(' + ') : (userTeam.constructor || "No definido");
       var html = '<div style="border:1px solid #444;padding:15px;border-radius:8px;background:#1a1a1a;">';
