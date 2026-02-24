@@ -1,5 +1,5 @@
 const f1Calendar2026 = [
-  { round: 1, gp: "Australia", city: "Melbourne", date: "2026-03-08", sprint: false },
+  { round: 1, gp: "Australia", city: "Melbourne", date: "2026-03-08",  <sprint: false },
   { round: 2, gp: "China", city: "Shanghai", date: "2026-03-15", sprint: true },
   { round: 3, gp: "Japan", city: "Suzuka", date: "2026-03-29", sprint: false },
   { round: 4, gp: "Bahrain", city: "Sakhir", date: "2026-04-12", sprint: false },
