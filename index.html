@@ -1,132 +1,130 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>F1 Fantasy Assistant 2026</title>
-    <link rel="manifest" href="manifest.json" />
-    <meta name="theme-color" content="#e10600" />
-    <link rel="stylesheet" href="styles.css" />
-    <style>
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.75);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-        .modal-overlay.active { display: flex; }
-        .modal-box {
-            background: #1e1e1e;
-            border: 1px solid #e10600;
-            border-radius: 10px;
-            padding: 25px;
-            max-width: 600px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-            position: relative;
-        }
-        .modal-box h3 { color: #e10600; margin-top: 0; }
-        .modal-close {
-            position: absolute;
-            top: 10px; right: 15px;
-            background: none; border: none;
-            color: #fff; font-size: 1.5rem;
-            cursor: pointer;
-        }
-        .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px; }
-        #proposal-text {
-            background: #111;
-            border: 1px solid #333;
-            border-radius: 6px;
-            padding: 15px;
-            line-height: 1.7;
-            color: #ccc;
-            margin: 15px 0;
-        }
-        .next-race-highlight {
-            background: #2a1a00 !important;
-            font-weight: bold;
-        }
-    </style>
+ <meta charset="UTF-8" />
+ <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+ <title>F1 Fantasy Assistant 2026</title>
+ <link rel="manifest" href="manifest.json" />
+ <meta name="theme-color" content="#e10600" />
+ <link rel="stylesheet" href="styles.css" />
+ <style>
+ .modal-overlay {
+ display: none;
+ position: fixed;
+ top: 0; left: 0;
+ width: 100%; height: 100%;
+ background: rgba(0,0,0,0.75);
+ z-index: 1000;
+ justify-content: center;
+ align-items: center;
+ }
+ .modal-overlay.active { display: flex; }
+ .modal-box {
+ background: #1e1e1e;
+ border: 1px solid #e10600;
+ border-radius: 10px;
+ padding: 25px;
+ max-width: 600px;
+ width: 90%;
+ max-height: 80vh;
+ overflow-y: auto;
+ position: relative;
+ }
+ .modal-box h3 { color: #e10600; margin-top: 0; }
+ .modal-close {
+ position: absolute;
+ top: 10px; right: 15px;
+ background: none; border: none;
+ color: #fff; font-size: 1.5rem;
+ cursor: pointer;
+ }
+ .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px; }
+ #proposal-text {
+ background: #111;
+ border: 1px solid #333;
+ border-radius: 6px;
+ padding: 15px;
+ line-height: 1.7;
+ color: #ccc;
+ margin: 15px 0;
+ }
+ .next-race-highlight {
+ background: #2a1a00 !important;
+ font-weight: bold;
+ }
+ .team-container {
+ display: flex;
+ flex-direction: column;
+ gap: 10px;
+ }
+ </style>
 </head>
 <body>
-    <header>
-        <div class="header-content">
-            <span class="f1-logo">F1</span>
-            <div>
-                <h1>Fantasy Assistant 2026</h1>
-                <p class="subtitle">Gestiona tu equipo gran premio a gran premio</p>
-            </div>
-        </div>
-    </header>
-
-    <main>
-        <section id="next-race-section" class="card">
-            <h2>Proxima Carrera - Analisis FIA</h2>
-            <div id="next-race-info">Cargando analisis del Agente FIA...</div>
-        </section>
-
-        <section class="card">
-            <h2>Mi Equipo Actual</h2>
-            <div id="team-display" class="team-grid"></div>
-            <div class="btn-group">
-                <button id="propose-team-btn" class="btn-secondary">
-                    Propuesta de equipo para proxima carrera
-                </button>
-                <button id="edit-team-btn" class="btn-primary">
-                    Editar equipo en Fantasy F1
-                </button>
-            </div>
-        </section>
-
-        <section class="card">
-            <h2>Calendario F1 2026</h2>
-            <div class="table-wrapper">
-                <table id="calendar-table">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Gran Premio</th>
-                            <th>Ciudad</th>
-                            <th>Fecha</th>
-                            <th>Sprint</th>
-                            <th>Estado</th>
-                        </tr>
-                    </thead>
-                    <tbody id="calendar-body"></tbody>
-                </table>
-            </div>
-        </section>
-
-        <section class="card">
-            <h2>Notificaciones</h2>
-            <button id="enable-notifications" class="btn-secondary">Activar Notificaciones FIA</button>
-            <p id="notifications-status"></p>
-        </section>
-    </main>
-
-    <!-- Modal propuesta de equipo -->
-    <div id="team-modal" class="modal-overlay">
-        <div class="modal-box">
-            <button class="modal-close" id="close-modal">&times;</button>
-            <h3>Propuesta del Agente FIA</h3>
-            <div id="proposal-text">Calculando propuesta...</div>
-            <div class="btn-group">
-                <button id="confirm-changes-btn" class="btn-primary">Confirmar - ir a Fantasy F1</button>
-                <button id="cancel-modal-btn" class="btn-secondary">Cerrar</button>
-            </div>
-        </div>
-    </div>
-
-    <footer style="text-align:center; padding:20px; color:#666; font-size:0.85rem;">
-        F1 Fantasy Assistant 2026 &bull; pikinaita
-    </footer>
-
-    <script src="app.js"></script>
+ <header>
+ <div class="header-content">
+ <span class="f1-logo">F1</span>
+ <div>
+ <h1>Fantasy Assistant 2026</h1>
+ <p class="subtitle">Gestiona tu equipo gran premio a gran premio</p>
+ </div>
+ </div>
+ </header>
+ <main>
+ <section id="next-race-section" class="card">
+ <h2>Próxima Carrera - Análisis FIA</h2>
+ <div id="next-race-info">Cargando análisis del Agente FIA...</div>
+ </section>
+ <section class="card">
+ <h2>Mi Equipo Actual</h2>
+ <div id="team-display"></div>
+ <div class="btn-group">
+ <button id="propose-team-btn" class="btn-secondary">
+ Propuesta de equipo para próxima carrera
+ </button>
+ <button id="edit-team-btn" class="btn-primary">
+ Ir a Fantasy F1
+ </button>
+ </div>
+ </section>
+ <section class="card">
+ <h2>Calendario F1 2026</h2>
+ <div class="table-wrapper">
+ <table id="calendar-table">
+ <thead>
+ <tr>
+ <th>#</th>
+ <th>Gran Premio</th>
+ <th>Ciudad</th>
+ <th>Fecha</th>
+ <th>Sprint</th>
+ <th>Estado</th>
+ </tr>
+ </thead>
+ <tbody id="calendar-body"></tbody>
+ </table>
+ </div>
+ </section>
+ <section class="card">
+ <h2>Notificaciones</h2>
+ <button id="enable-notifications" class="btn-secondary">Activar Notificaciones FIA</button>
+ <p id="notifications-status"></p>
+ </section>
+ </main>
+ <!-- Modal propuesta de equipo -->
+ <div id="team-modal" class="modal-overlay">
+ <div class="modal-box">
+ <button class="modal-close" id="close-modal">×</button>
+ <h3>Propuesta del Agente FIA</h3>
+ <div id="proposal-text">Calculando propuesta...</div>
+ <div class="btn-group">
+ <button id="confirm-changes-btn" class="btn-primary">Confirmar - Cargar en App</button>
+ <button id="cancel-modal-btn" class="btn-secondary">Cerrar</button>
+ </div>
+ </div>
+ </div>
+ <footer style="text-align:center; padding:20px; color:#666; font-size:0.85rem;">
+ F1 Fantasy Assistant 2026 • pikinaita
+ </footer>
+ <script src="app.js"></script>
 </body>
 </html>
