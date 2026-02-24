@@ -28,27 +28,20 @@ const f1Calendar2026 = [
 const FIA_Agent = {
   name: "Comisario Fantasy",
   analysisDate: "2026-02-24",
-  currentIntelligence: "Juego Activo 2026: 100M presupuesto, 5 pilotos, 2 constructores. Precios destacados: Max ($27.7M), Perez ($6.0M - Ganga!), Mercedes ($29.3M), Ferrari ($23.3M). Cadillac ($6.0M) es vital para equilibrar.",
   
   analyzeRace: function(race) {
-    let advice = \`FIA Intel [\${this.analysisDate}]: GP \${race.gp} (\${race.city}). \`;
-    if (race.sprint) { advice += "¡Fin de semana SPRINT! Penalización DNF reducida a -10 pts. "; }
+    let advice = `<strong>FIA Intel [${this.analysisDate}]:</strong> GP ${race.gp} (${race.city}). `;
+    if (race.sprint) { advice += "<br><em>¡Fin de semana SPRINT! Penalización DNF reducida a -10 pts.</em> "; }
     
     const proposals = {
-      1: "PROPUESTA AUSTRALIA: Un equipo equilibrado aprovechando el precio de Perez. Constructores: Ferrari ($23.3M) + Red Bull ($28.2M). Pilotos: K. Antonelli ($23.2M), S. Perez ($6.0M), N. Hulkenberg ($6.8M), L. Lawson ($6.5M), V. Bottas ($5.9M). Total: $99.9M.",
-      2: "China: Evaluar el rendimiento de Cadillac tras Australia. Si Ferrari domina, mantener su constructor."
+      1: "<strong>PROPUESTA AUSTRALIA:</strong> Equipo equilibrado (Presupuesto: $100M).<br>Constructores: Ferrari ($23.3M) + Red Bull ($28.2M).<br>Pilotos: K. Antonelli ($23.2M), S. Perez ($6.0M), N. Hulkenberg ($6.8M), L. Lawson ($6.5M), V. Bottas ($5.9M).<br>Total: $99.9M.",
+      2: "<strong>China:</strong> Evaluar Cadillac tras el debut. Si Ferrari mantiene ritmo, conservar su constructor."
     };
     
-    advice += proposals[race.round] || "Mantener equipo base y esperar a los Libres 1.";
+    advice += "<br>" + (proposals[race.round] || "Mantener equipo base y esperar a los Libres 1.");
     return advice;
   },
-
-  getReminders: function() {
-    const today = new Date();
-    const nextRace = f1Calendar2026.find(r => new Date(r.date) > today);
-    return nextRace ? this.analyzeRace(nextRace) : "Fin de temporada 2026.";
-  },
-
+  
   getProposal: function() {
     const today = new Date();
     const nextRace = f1Calendar2026.find(r => new Date(r.date) > today) || f1Calendar2026[0];
@@ -58,37 +51,44 @@ const FIA_Agent = {
 
 let userTeam = JSON.parse(localStorage.getItem('f1Team')) || null;
 
-// Reparación de datos antiguos (migración a 2 constructores si es necesario)
-if (userTeam && userTeam.constructor && !userTeam.constructores) {
-  userTeam.constructores = [userTeam.constructor, "Por definir"];
-  delete userTeam.constructor;
-  localStorage.setItem('f1Team', JSON.stringify(userTeam));
+// Migración robusta a 2 constructores
+if (userTeam) {
+  if (userTeam.constructor && !userTeam.constructores) {
+    userTeam.constructores = [userTeam.constructor, "Por definir"];
+    delete userTeam.constructor;
+    localStorage.setItem('f1Team', JSON.stringify(userTeam));
+  }
 }
 
 function updateUI() {
   const display = document.getElementById('team-display');
   const info = document.getElementById('next-race-info');
   
-  if (info) info.innerText = FIA_Agent.getReminders();
-  
+  if (info) {
+    const today = new Date();
+    const nextRace = f1Calendar2026.find(r => new Date(r.date) > today) || f1Calendar2026[0];
+    info.innerHTML = FIA_Agent.analyzeRace(nextRace);
+  }
+
   if (display) {
     if (!userTeam) {
-      display.innerHTML = '<p class="status-msg">Sin equipo configurado. Pulsa \"Propuesta de equipo\".</p>';
+      display.innerHTML = '<p class="status-msg">Sin equipo configurado. Pulsa "Propuesta de equipo".</p>';
     } else {
       let html = '<div class="team-container">';
       
-      // Mostrar Constructores
-      html += '<div class="constructors-box" style=\"display:flex; gap:10px; margin-bottom:10px;\">';
-      const cons = userTeam.constructores || [];
+      // Constructores (2 requeridos)
+      html += '<div class="constructors-box" style="display:flex; gap:10px; margin-bottom:10px;">';
+      const cons = userTeam.constructores || ["Por definir", "Por definir"];
       cons.forEach((c, idx) => {
-        html += \`<div class=\"team-card\" style=\"flex:1;\"><div class=\"role\">Constructor \${idx + 1}</div><div class=\"name\">\${c}</div></div>\`;
+        html += `<div class="team-card" style="flex:1;"><div class="role">Constructor ${idx + 1}</div><div class="name">${c}</div></div>`;
       });
       html += '</div>';
       
-      // Mostrar Pilotos
-      html += '<div class=\"team-grid\">';
-      userTeam.pilotos.forEach(p => {
-        html += \`<div class=\"team-card\"><div class=\"role\">Piloto</div><div class=\"name\">\${p}</div></div>\`;
+      // Pilotos (5 requeridos)
+      html += '<div class="team-grid">';
+      const drivers = userTeam.pilotos || ["-", "-", "-", "-", "-"];
+      drivers.forEach(p => {
+        html += `<div class="team-card"><div class="role">Piloto</div><div class="name">${p}</div></div>`;
       });
       html += '</div></div>';
       
@@ -108,27 +108,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
   setupButton('propose-team-btn', () => {
     const text = document.getElementById('proposal-text');
-    if (text) text.innerText = FIA_Agent.getProposal();
-    document.getElementById('team-modal').classList.add('active');
-  });
-
-  setupButton('edit-team-btn', () => {
-    window.open(\"https://fantasy.formula1.com/en/my-team\", \"_blank\");
+    const modal = document.getElementById('team-modal');
+    if (text) text.innerHTML = "Analizando datos de la FIA...";
+    if (modal) modal.classList.add('active');
+    
+    // Simular tiempo de carga para mejorar el feedback visual
+    setTimeout(() => {
+      if (text) text.innerHTML = FIA_Agent.getProposal();
+    }, 600);
   });
 
   setupButton('close-modal', () => document.getElementById('team-modal').classList.remove('active'));
   setupButton('cancel-modal-btn', () => document.getElementById('team-modal').classList.remove('active'));
 
+  // Cerrar modal al hacer click fuera
+  const modalOverlay = document.getElementById('team-modal');
+  if (modalOverlay) {
+    modalOverlay.addEventListener('click', (e) => {
+      if (e.target === modalOverlay) modalOverlay.classList.remove('active');
+    });
+  }
+
   setupButton('confirm-changes-btn', () => {
-    userTeam = {
-      pilotos: [\"Kimi Antonelli\", \"Sergio Perez\", \"Nico Hulkenberg\", \"Liam Lawson\", \"Valtteri Bottas\"],
-      constructores: [\"Ferrari\", \"Red Bull Racing\"],
-      creado: new Date().toISOString()
-    };
-    localStorage.setItem('f1Team', JSON.stringify(userTeam));
-    updateUI();
-    document.getElementById('team-modal').classList.remove('active');
-    alert(\"Agente FIA: Equipo para Australia cargado en la App. ¡Suerte!\");
+    try {
+      userTeam = {
+        pilotos: ["Kimi Antonelli", "Sergio Perez", "Nico Hulkenberg", "Liam Lawson", "Valtteri Bottas"],
+        constructores: ["Ferrari", "Red Bull Racing"],
+        creado: new Date().toISOString()
+      };
+      localStorage.setItem('f1Team', JSON.stringify(userTeam));
+      updateUI();
+      document.getElementById('team-modal').classList.remove('active');
+      
+      // Reemplazar alert por algo más moderno o simplemente actualizar UI
+      const infoSection = document.getElementById('next-race-info');
+      if (infoSection) {
+        const originalText = infoSection.innerHTML;
+        infoSection.innerHTML = "<div style='color:#00ff00; margin-bottom:10px;'>¡Equipo actualizado con éxito!</div>" + originalText;
+      }
+    } catch (e) {
+      console.error("Error al confirmar cambios:", e);
+      alert("Error al cargar el equipo. Revisa la consola.");
+    }
+  });
+
+  setupButton('edit-team-btn', () => {
+    window.open("https://fantasy.formula1.com/en/my-team", "_blank");
   });
 
   setupButton('enable-notifications', () => {
@@ -136,8 +161,8 @@ document.addEventListener('DOMContentLoaded', () => {
       Notification.requestPermission().then(permission => {
         if (permission === 'granted') {
           const statusEl = document.getElementById('notifications-status');
-          if (statusEl) statusEl.innerText = \"Notificaciones activadas\";
-          new Notification(\"FIA Agent\", { body: FIA_Agent.getReminders() });
+          if (statusEl) statusEl.innerText = "Notificaciones activadas";
+          new Notification("FIA Agent", { body: "Recordatorios activados para la temporada 2026" });
         }
       });
     }
@@ -157,15 +182,16 @@ function renderCalendar() {
     const isNext = !isPast && (i === 0 || new Date(f1Calendar2026[i-1].date) < today);
     
     if (isNext) row.classList.add('next-race-highlight');
-    
-    row.innerHTML = \`
-      <td>\${race.round}</td>
-      <td>\${race.gp}</td>
-      <td>\${race.city}</td>
-      <td>\${race.date}</td>
-      <td>\${race.sprint ? 'SPRINT' : '-'}</td>
-      <td>\${isPast ? 'Finalizado' : (isNext ? 'PRÓXIMA' : 'Pendiente')}</td>
-    \`;
+    if (isPast) row.classList.add('race-past');
+
+    row.innerHTML = `
+      <td>${race.round}</td>
+      <td>${race.gp}</td>
+      <td>${race.city}</td>
+      <td>${race.date}</td>
+      <td>${race.sprint ? '<span class="badge badge-sprint">SPRINT</span>' : '-'}</td>
+      <td>${isPast ? '<span class="badge badge-past">Finalizado</span>' : (isNext ? '<span class="badge badge-upcoming">PRÓXIMA</span>' : 'Pendiente')}</td>
+    `;
     body.appendChild(row);
   });
 }
