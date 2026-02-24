@@ -28,160 +28,144 @@ const f1Calendar2026 = [
 const FIA_Agent = {
   name: "Comisario Fantasy",
   analysisDate: "2026-02-24",
-  currentIntelligence: "Juego Activo: 100M presupuesto, 5 pilotos, 2 constructores. Mercedes ($28M) y Ferrari ($22M) lideran. Cadillac ($6.5M) es clave para el presupuesto.",
+  currentIntelligence: "Juego Activo 2026: 100M presupuesto, 5 pilotos, 2 constructores. Precios destacados: Max ($27.7M), Perez ($6.0M - Ganga!), Mercedes ($29.3M), Ferrari ($23.3M). Cadillac ($6.0M) es vital para equilibrar.",
+  
   analyzeRace: function(race) {
-    var advice = "FIA Intel [" + this.analysisDate + "]: GP " + race.gp + " (" + race.city + "). ";
-    if (race.sprint) { advice += "SPRINT - Penalización DNF -10 pts. "; }
-    var proposals = {
-      1: "EQUIPO AUSTRALIA: Leclerc ($21.5M), Bearman ($7M), Gasly ($8M), Ocon ($7M), Hadjar ($3M). Constructores: Ferrari ($22M) + Mercedes ($28M). Presupuesto total: $96.5M.",
-      2: "China: Evaluar rendimiento de Cadillac. Mantener Ferrari/Mercedes si dominan.",
+    let advice = \`FIA Intel [\${this.analysisDate}]: GP \${race.gp} (\${race.city}). \`;
+    if (race.sprint) { advice += "¡Fin de semana SPRINT! Penalización DNF reducida a -10 pts. "; }
+    
+    const proposals = {
+      1: "PROPUESTA AUSTRALIA: Un equipo equilibrado aprovechando el precio de Perez. Constructores: Ferrari ($23.3M) + Red Bull ($28.2M). Pilotos: K. Antonelli ($23.2M), S. Perez ($6.0M), N. Hulkenberg ($6.8M), L. Lawson ($6.5M), V. Bottas ($5.9M). Total: $99.9M.",
+      2: "China: Evaluar el rendimiento de Cadillac tras Australia. Si Ferrari domina, mantener su constructor."
     };
-    advice += proposals[race.round] || "Mantener equipo y evaluar clasificación.";
+    
+    advice += proposals[race.round] || "Mantener equipo base y esperar a los Libres 1.";
     return advice;
   },
+
   getReminders: function() {
-    var today = new Date();
-    var nextRace = null;
-    for (var i = 0; i < f1Calendar2026.length; i++) {
-      if (new Date(f1Calendar2026[i].date) > today) {
-        nextRace = f1Calendar2026[i];
-        break;
-      }
-    }
-    if (nextRace) { return this.analyzeRace(nextRace); }
-    return "Fin de temporada 2026.";
+    const today = new Date();
+    const nextRace = f1Calendar2026.find(r => new Date(r.date) > today);
+    return nextRace ? this.analyzeRace(nextRace) : "Fin de temporada 2026.";
   },
-  getProposal: function(race) {
-    if (!race) {
-      var today = new Date();
-      for (var i = 0; i < f1Calendar2026.length; i++) {
-        if (new Date(f1Calendar2026[i].date) > today) {
-          race = f1Calendar2026[i];
-          break;
-        }
-      }
-    }
-    if (!race) { return "Fin de temporada."; }
-    return this.analyzeRace(race);
+
+  getProposal: function() {
+    const today = new Date();
+    const nextRace = f1Calendar2026.find(r => new Date(r.date) > today) || f1Calendar2026[0];
+    return this.analyzeRace(nextRace);
   }
 };
 
-var userTeam = JSON.parse(localStorage.getItem('f1Team')) || null;
+let userTeam = JSON.parse(localStorage.getItem('f1Team')) || null;
 
-function closeModalFn() {
-  var modal = document.getElementById('team-modal');
-  if (modal) { modal.style.display = 'none'; }
+// Reparación de datos antiguos (migración a 2 constructores si es necesario)
+if (userTeam && userTeam.constructor && !userTeam.constructores) {
+  userTeam.constructores = [userTeam.constructor, "Por definir"];
+  delete userTeam.constructor;
+  localStorage.setItem('f1Team', JSON.stringify(userTeam));
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-  renderCalendar();
-  updateUI();
-
-  var proposeBtn = document.getElementById('propose-team-btn');
-  var editBtn = document.getElementById('edit-team-btn');
-  var modal = document.getElementById('team-modal');
-  var closeModalBtn = document.getElementById('close-modal');
-  var confirmBtn = document.getElementById('confirm-changes-btn');
-  var cancelModalBtn = document.getElementById('cancel-modal-btn');
-
-  if (proposeBtn) {
-    proposeBtn.addEventListener('click', function() {
-      var proposalText = document.getElementById('proposal-text');
-      if (proposalText) { proposalText.innerText = FIA_Agent.getProposal(); }
-      if (modal) { modal.style.display = 'block'; }
-    });
-  }
-
-  if (editBtn) {
-    editBtn.addEventListener('click', function() {
-      userTeam = {
-        pilotos: ["Charles Leclerc", "Oliver Bearman", "Pierre Gasly", "Esteban Ocon", "Isack Hadjar"],
-        constructores: ["Ferrari", "Mercedes"],
-        creado: new Date().toISOString()
-      };
-      localStorage.setItem('f1Team', JSON.stringify(userTeam));
-      alert("Agente FIA: Alineación Australia 2026 ($96.5M) cargada. Abriendo Fantasy F1...");
-      updateUI();
-      window.open("https://fantasy.formula1.com/en/my-team", "_blank");
-    });
-  }
-
-  if (closeModalBtn) { closeModalBtn.addEventListener('click', closeModalFn); }
-  if (cancelModalBtn) { cancelModalBtn.addEventListener('click', closeModalFn); }
-  
-  if (confirmBtn) {
-    confirmBtn.addEventListener('click', function() {
-      userTeam = {
-        pilotos: ["Charles Leclerc", "Oliver Bearman", "Pierre Gasly", "Esteban Ocon", "Isack Hadjar"],
-        constructores: ["Ferrari", "Mercedes"],
-        creado: new Date().toISOString()
-      };
-      localStorage.setItem('f1Team', JSON.stringify(userTeam));
-      updateUI();
-      closeModalFn();
-      alert("Equipo actualizado para Australia 2026.");
-    });
-  }
-
-  var notifyBtn = document.getElementById('enable-notifications');
-  if (notifyBtn) {
-    notifyBtn.addEventListener('click', function() {
-      if ('Notification' in window) {
-        Notification.requestPermission().then(function(p) {
-          if (p === 'granted') {
-            var statusEl = document.getElementById('notifications-status');
-            if (statusEl) { statusEl.innerText = "Notificaciones activadas"; }
-            new Notification("FIA Agent - F1 Fantasy", {
-              body: FIA_Agent.getReminders(),
-              icon: "icon-192.png"
-            });
-          }
-        });
-      }
-    });
-  }
-});
-
 function updateUI() {
-  var display = document.getElementById('team-display');
-  var info = document.getElementById('next-race-info');
-
-  if (info) { info.innerText = "Analisis FIA: " + FIA_Agent.getReminders(); }
-
+  const display = document.getElementById('team-display');
+  const info = document.getElementById('next-race-info');
+  
+  if (info) info.innerText = FIA_Agent.getReminders();
+  
   if (display) {
     if (!userTeam) {
-      display.innerHTML = '<p class="status-msg">Sin equipo configurado. Pulsa "Propuesta de equipo".</p>';
+      display.innerHTML = '<p class="status-msg">Sin equipo configurado. Pulsa \"Propuesta de equipo\".</p>';
     } else {
-      var consText = userTeam.constructores ? userTeam.constructores.join(' + ') : (userTeam.constructor || "No definido");
-      var html = '<div style="border:1px solid #444;padding:15px;border-radius:8px;background:#1a1a1a;">';
-      html += '<h3 style="color:#e10600;margin-top:0;">Constructores: ' + consText + '</h3>';
-      html += '<ul style="list-style:none;padding:0;">';
-      for (var i = 0; i < userTeam.pilotos.length; i++) {
-        html += '<li style="margin-bottom:5px;padding:5px;border-bottom:1px solid #333;">🏎 ' + userTeam.pilotos[i] + '</li>';
-      }
-      html += '</ul></div>';
+      let html = '<div class="team-container">';
+      
+      // Mostrar Constructores
+      html += '<div class="constructors-box" style=\"display:flex; gap:10px; margin-bottom:10px;\">';
+      const cons = userTeam.constructores || [];
+      cons.forEach((c, idx) => {
+        html += \`<div class=\"team-card\" style=\"flex:1;\"><div class=\"role\">Constructor \${idx + 1}</div><div class=\"name\">\${c}</div></div>\`;
+      });
+      html += '</div>';
+      
+      // Mostrar Pilotos
+      html += '<div class=\"team-grid\">';
+      userTeam.pilotos.forEach(p => {
+        html += \`<div class=\"team-card\"><div class=\"role\">Piloto</div><div class=\"name\">\${p}</div></div>\`;
+      });
+      html += '</div></div>';
+      
       display.innerHTML = html;
     }
   }
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+  renderCalendar();
+  updateUI();
+
+  const setupButton = (id, action) => {
+    const btn = document.getElementById(id);
+    if (btn) btn.addEventListener('click', action);
+  };
+
+  setupButton('propose-team-btn', () => {
+    const text = document.getElementById('proposal-text');
+    if (text) text.innerText = FIA_Agent.getProposal();
+    document.getElementById('team-modal').classList.add('active');
+  });
+
+  setupButton('edit-team-btn', () => {
+    window.open(\"https://fantasy.formula1.com/en/my-team\", \"_blank\");
+  });
+
+  setupButton('close-modal', () => document.getElementById('team-modal').classList.remove('active'));
+  setupButton('cancel-modal-btn', () => document.getElementById('team-modal').classList.remove('active'));
+
+  setupButton('confirm-changes-btn', () => {
+    userTeam = {
+      pilotos: [\"Kimi Antonelli\", \"Sergio Perez\", \"Nico Hulkenberg\", \"Liam Lawson\", \"Valtteri Bottas\"],
+      constructores: [\"Ferrari\", \"Red Bull Racing\"],
+      creado: new Date().toISOString()
+    };
+    localStorage.setItem('f1Team', JSON.stringify(userTeam));
+    updateUI();
+    document.getElementById('team-modal').classList.remove('active');
+    alert(\"Agente FIA: Equipo para Australia cargado en la App. ¡Suerte!\");
+  });
+
+  setupButton('enable-notifications', () => {
+    if ('Notification' in window) {
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          const statusEl = document.getElementById('notifications-status');
+          if (statusEl) statusEl.innerText = \"Notificaciones activadas\";
+          new Notification(\"FIA Agent\", { body: FIA_Agent.getReminders() });
+        }
+      });
+    }
+  });
+});
+
 function renderCalendar() {
-  var body = document.getElementById('calendar-body');
-  if (!body) { return; }
+  const body = document.getElementById('calendar-body');
+  if (!body) return;
   body.innerHTML = '';
-  var today = new Date();
-  for (var i = 0; i < f1Calendar2026.length; i++) {
-    var race = f1Calendar2026[i];
-    var row = document.createElement('tr');
-    var isPast = new Date(race.date) < today;
-    var isNext = !isPast && (i === 0 || new Date(f1Calendar2026[i-1].date) < today);
-    if (isNext) { row.style.background = '#2a1a00'; row.style.fontWeight = 'bold'; }
-    row.innerHTML = '<td>' + race.round + '</td>' +
-      '<td>' + race.gp + '</td>' +
-      '<td>' + race.city + '</td>' +
-      '<td>' + race.date + '</td>' +
-      '<td>' + (race.sprint ? 'SPRINT' : '-') + '</td>' +
-      '<td>' + (isPast ? 'Finalizado' : (isNext ? 'PROXIMA' : 'Pendiente')) + '</td>';
+  const today = new Date();
+  
+  f1Calendar2026.forEach((race, i) => {
+    const row = document.createElement('tr');
+    const raceDate = new Date(race.date);
+    const isPast = raceDate < today;
+    const isNext = !isPast && (i === 0 || new Date(f1Calendar2026[i-1].date) < today);
+    
+    if (isNext) row.classList.add('next-race-highlight');
+    
+    row.innerHTML = \`
+      <td>\${race.round}</td>
+      <td>\${race.gp}</td>
+      <td>\${race.city}</td>
+      <td>\${race.date}</td>
+      <td>\${race.sprint ? 'SPRINT' : '-'}</td>
+      <td>\${isPast ? 'Finalizado' : (isNext ? 'PRÓXIMA' : 'Pendiente')}</td>
+    \`;
     body.appendChild(row);
-  }
+  });
 }
