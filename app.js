@@ -93,10 +93,49 @@ const FIA_Agent = {
         let budget = 100.0;
         let selC = [], selD = [];
 
-        // Greedy optimization
-        scoredConstructors.forEach(c => { if (selC.length < 2 && budget >= c.price) { selC.push(c); budget -= c.price; } });
-        scoredDrivers.forEach(d => { if (selD.length < 5 && budget >= d.price) { selD.push(d); budget -= d.price; } });
+        // ALGORITMO CORREGIDO: Garantiza SIEMPRE 5 pilotos + 2 constructores
+        // Genera combinaciones válidas y selecciona la mejor por score total
+        const getCombinations = (arr, size) => {
+            if (size === 1) return arr.map(el => [el]);
+            return arr.flatMap((el, i) => 
+                getCombinations(arr.slice(i + 1), size - 1).map(comb => [el, ...comb])
+            );
+        };
 
+        const allConstructorPairs = getCombinations(scoredConstructors, 2);
+        const allDriverGroups = getCombinations(scoredDrivers, 5);
+        
+        let bestTeam = null;
+        let bestScore = -Infinity;
+        
+        // Probar todas las combinaciones válidas
+        for (const constructors of allConstructorPairs) {
+            for (const drivers of allDriverGroups) {
+                const totalCost = constructors.reduce((sum, c) => sum + c.price, 0) +
+                                  drivers.reduce((sum, d) => sum + d.price, 0);
+                
+                if (totalCost <= 100.0) {
+                    const teamScore = constructors.reduce((sum, c) => sum + c.score, 0) +
+                                      drivers.reduce((sum, d) => sum + d.score, 0);
+                    
+                    if (teamScore > bestScore) {
+                        bestScore = teamScore;
+                        bestTeam = { constructors, drivers, totalCost };
+                    }
+                }
+            }
+        }
+        
+        // Validación crítica: NUNCA devolver menos de 5 pilotos
+        if (!bestTeam || bestTeam.drivers.length !== 5 || bestTeam.constructors.length !== 2) {
+            return {
+                error: true,
+                message: "ERROR CRÍTICO: No se pudo generar un equipo válido con 5 pilotos y 2 constructores dentro del presupuesto."
+            };
+        }
+        
+        let selC = bestTeam.constructors;
+        let selD = bestTeam.drivers;
         const reasoningMap = {
             ver: "Dominio técnico en sectores de alta velocidad.",
             lec: "Especialista en este tipo de trazado urbano/mixto.",
@@ -110,7 +149,7 @@ const FIA_Agent = {
             mode: mode,
             constructors: selC,
             drivers: selD,
-            totalCost: 100.0 - budget,
+            totalCost: bestTeam.totalCost
             details: selD.map(d => ({ name: d.name, why: reasoningMap[d.id] || "Rendimiento sólido en simulaciones de Libres." })),
             cDetails: selC.map(c => ({ name: c.name, why: reasoningMap[c.id] || "Fiabilidad mecánica probada." }))
         };
