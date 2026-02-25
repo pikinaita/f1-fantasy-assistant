@@ -90,8 +90,6 @@ const FIA_Agent = {
         const scoredDrivers = this.assets.drivers.map(d => ({ ...d, score: getScore(d, false) })).sort((a, b) => b.score - a.score);
         const scoredConstructors = this.assets.constructors.map(c => ({ ...c, score: getScore(c, true) })).sort((a, b) => b.score - a.score);
 
-        let budget = 100.0;
-        let selC = [], selD = [];
 
         // ALGORITMO CORREGIDO: Garantiza SIEMPRE 5 pilotos + 2 constructores
         // Genera combinaciones válidas y selecciona la mejor por score total
@@ -149,7 +147,7 @@ const FIA_Agent = {
             mode: mode,
             constructors: selC,
             drivers: selD,
-            totalCost: bestTeam.totalCost
+            totalCost: bestTeam.totalCost,
             details: selD.map(d => ({ name: d.name, why: reasoningMap[d.id] || "Rendimiento sólido en simulaciones de Libres." })),
             cDetails: selC.map(c => ({ name: c.name, why: reasoningMap[c.id] || "Fiabilidad mecánica probada." }))
         };
