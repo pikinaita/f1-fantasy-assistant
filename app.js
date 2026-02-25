@@ -112,7 +112,7 @@ const FIA_Agent = {
                 const totalCost = constructors.reduce((sum, c) => sum + c.price, 0) +
                                   drivers.reduce((sum, d) => sum + d.price, 0);
                 
-                if (totalCost <= 100.0) {
+                if (totalCost <= this.getCurrentBudget()) {
                     const teamScore = constructors.reduce((sum, c) => sum + c.score, 0) +
                                       drivers.reduce((sum, d) => sum + d.score, 0);
                     
