@@ -103,8 +103,7 @@ const FIA_Agent = {
         const allConstructorPairs = getCombinations(scoredConstructors, 2);
         const allDriverGroups = getCombinations(scoredDrivers, 5);
         
-        let bestTeam = null;
-        let bestScore = -Infinity;
+        let top3Teams = []; // Array para guardar los 3 mejores equiposinity;
         
         // Probar todas las combinaciones válidas
         for (const constructors of allConstructorPairs) {
@@ -116,42 +115,56 @@ const FIA_Agent = {
                     const teamScore = constructors.reduce((sum, c) => sum + c.score, 0) +
                                       drivers.reduce((sum, d) => sum + d.score, 0);
                     
-                    if (teamScore > bestScore) {
-                        bestScore = teamScore;
-                        bestTeam = { constructors, drivers, totalCost };
-                    }
+                    // Agregar al top 3
+                    top3Teams.push({ constructors, drivers, totalCost, teamScore });
+                    // Ordenar por score descendente
+                    top3Teams.sort((a, b) => b.teamScore - a.teamScore);
+                    // Mantener solo los 3 mejores
+                    if (top3Teams.length > 3) top3Teams = top3Teams.slice(0, 3);
                 }
             }
         }
         
         // Validación crítica: NUNCA devolver menos de 5 pilotos
-        if (!bestTeam || bestTeam.drivers.length !== 5 || bestTeam.constructors.length !== 2) {
+        // Validación: verificar que tengamos al menos 1 equipo válido
+        if (top3Teams.length === 0) {
             return {
                 error: true,
-                message: "ERROR CRÍTICO: No se pudo generar un equipo válido con 5 pilotos y 2 constructores dentro del presupuesto."
+                message: "ERROR CRÍTICO: No se pudo generar equipos válidos con 5 pilotos y 2 constructores dentro del presupuesto."
             };
         }
-        
-        let selC = bestTeam.constructors;
-        let selD = bestTeam.drivers;
-        const reasoningMap = {
-            ver: "Dominio técnico en sectores de alta velocidad.",
-            lec: "Especialista en este tipo de trazado urbano/mixto.",
-            col: "Excelente relación puntos/precio para liberar presupuesto.",
-            fer: "Mejoras en la unidad de potencia 2026 confirmadas.",
-            rb: "Eficiencia aerodinámica superior para este GP."
-        };
 
-        return {
-            race: race.gp,
-            mode: mode,
-            constructors: selC,
-            drivers: selD,
-            totalCost: bestTeam.totalCost,
-            details: selD.map(d => ({ name: d.name, why: reasoningMap[d.id] || "Rendimiento sólido en simulaciones de Libres." })),
-            cDetails: selC.map(c => ({ name: c.name, why: reasoningMap[c.id] || "Fiabilidad mecánica probada." }))
-        };
-    }
+        // Generar las 3 propuestas con rankings
+        const proposals = top3Teams.map((team, index) => {
+            const reasoningMap = {
+                ver: "Dominio técnico en sectores de alta velocidad.",
+                lec: "Especialista en este tipo de trazado urbano/mixto.",
+                ham: "Experiencia probada en carreras clave.",
+                col: "Excelente relación puntos/precio para liberar presupuesto.",
+                fer: "Mejoras en la unidad de potencia 2026 confirmadas.",
+                rb: "Eficiencia aerodinámica superior para este GP."
+            };
+            
+            return {
+                rank: index + 1,
+                race: race.gp,
+                mode: mode,
+                constructors: team.constructors,
+                drivers: team.drivers,
+                totalCost: team.totalCost,
+                score: team.teamScore,
+                details: team.drivers.map(d => ({
+                    name: d.name,
+                    why: reasoningMap[d.id] || "Rendimiento sólido en simulaciones de Libres."
+                })),
+                cDetails: team.constructors.map(c => ({
+                    name: c.name,
+                    why: reasoningMap[c.id] || "Fiabilidad mecánica probada."
+                }))
+            };
+        });
+
+        return { proposals }; // Devolver array con 3 propuestas rankeadas
 };
 
 let userTeam = JSON.parse(localStorage.getItem('f1Team')) || null;
@@ -200,28 +213,55 @@ document.addEventListener('DOMContentLoaded', () => {
             const p = FIA_Agent.getIntelligentProposal(mode, parseFloat(risk));
             if (p.error) {
                 text.innerHTML = `<p style="color:#ff4444; font-weight:bold;">${p.message}</p>`;
-            } else {
-                let html = `<h4>Plan ${p.mode.toUpperCase()} - ${p.race}</h4>`;
-                html += `<p style="font-size:0.9rem; color:#ccc;">Presupuesto Utilizado: <b>$${p.totalCost.toFixed(1)}M</b> / $100M</p>`;
+                        } else {
+                // Mostrar las 3 propuestas rankeadas
+                let html = `<h4>3 Propuestas Analizadas para ${p.proposals[0].race}</h4>`;
+                html += `<p style="font-size:0.85em; color:#aaa; margin-bottom:20px;">Selecciona tu estrategia preferida</p>`;
                 
-                html += "<h5>Constructores:</h5><ul>";
-                p.cDetails.forEach(c => html += `<li><b>${c.name}</b>: ${c.why}</li>`);
-                html += "</ul><h5>Pilotos:</h5><ul>";
-                p.details.forEach(d => html += `<li><b>${d.name}</b>: ${d.why}</li>`);
-                html += "</ul>";
+                p.proposals.forEach((proposal, idx) => {
+                    const badge = idx === 0 ? "🥇 RECOMENDADA" : (idx === 1 ? "🥈" : "🥉");
+                    html += `
+                        <div class="proposal-card" style="border: 2px solid ${idx === 0 ? '#e10600' : '#444'}; padding: 15px; margin-bottom: 15px; border-radius: 8px; cursor: pointer;" data-proposal-index="${idx}">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <h5 style="margin: 0 0 10px 0;">${badge} Opción ${proposal.rank}</h5>
+                                <span style="font-size: 0.9em; color: #888;">Score: ${proposal.score.toFixed(1)}</span>
+                            </div>
+                            <p style="font-size:0.9rem; color:#ccc;">Presupuesto: <b>$${proposal.totalCost.toFixed(1)}M</b> / $${this.getCurrentBudget().toFixed(1)}M</p>
+                            <div style="font-size: 0.85em;">
+                                <b>Constructores:</b><ul style="margin: 5px 0;">`;
+                    proposal.cDetails.forEach(c => html += `<li><b>${c.name}</b>: ${c.why}</li>`);
+                    html += `</ul><b>Pilotos:</b><ul style="margin: 5px 0;">`;
+                    proposal.details.forEach(d => html += `<li><b>${d.name}</b>: ${d.why}</li>`);
+                    html += `</ul></div>
+                        </div>`;
+                });
+                
+                html += `<div style="margin-top: 20px;"><a href="https://fantasy.formula1.com" target="_blank" class="btn-secondary" style="width: 100%; display: inline-block; text-align: center; padding: 12px; text-decoration: none;">🏎️ Abrir F1 Fantasy</a></div>`;
                 
                 text.innerHTML = html;
-                window.lastProposal = p;
+                window.lastProposals = p.proposals; // Guardar las 3 propuestas
+                window.selectedProposalIndex = 0; // Por defecto la primera
+                
+                // Añadir listeners a las cards para selección
+                document.querySelectorAll('.proposal-card').forEach(card => {
+                    card.addEventListener('click', function() {
+                        document.querySelectorAll('.proposal-card').forEach(c => c.style.border = '2px solid #444');
+                        this.style.border = '2px solid #e10600';
+                        window.selectedProposalIndex = parseInt(this.dataset.proposalIndex);
+                    });
+                });
             }
         }, 1000);
     });
 
     document.getElementById('confirm-changes-btn')?.addEventListener('click', () => {
-        if (window.lastProposal) {
+                if (window.lastProposals && window.lastProposals.length > 0) {
+            const selectedProposal = window.lastProposals[window.selectedProposalIndex || 0];
             userTeam = {
-                pilotos: window.lastProposal.drivers.map(d => d.name),
-                constructores: window.lastProposal.constructors.map(c => c.name),
+                pilotos: selectedProposal.drivers.map(d => d.name),
+                constructores: selectedProposal.constructors.map(c => c.name),
                 date: new Date().toISOString()
+            };oISOString()
             };
             localStorage.setItem('f1Team', JSON.stringify(userTeam));
             updateUI();
