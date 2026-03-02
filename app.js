@@ -71,6 +71,28 @@ const FIA_Agent = {
         return dayDiff < 1.1; // Bloqueo 24h antes por seguridad de Libres
     },
 
+        getCurrentBudget: function() {
+        // PRESUPUESTO DINÁMICO: Aumenta según el valor del equipo actual
+        const baseStarterBudget = 100.0;
+        if (!userTeam || !userTeam.constructores || !userTeam.pilotos) {
+            return baseStarterBudget;
+        }
+        
+        let currentTeamValue = 0;
+        // Calcular valor actual del equipo
+        userTeam.constructores.forEach(cName => {
+            const c = this.assets.constructors.find(x => x.name === cName);
+            if (c) currentTeamValue += c.price;
+        });
+        userTeam.pilotos.forEach(pName => {
+            const p = this.assets.drivers.find(x => x.name === pName);
+            if (p) currentTeamValue += p.price;
+        });
+        
+        // Si el valor del equipo aumentó, el presupuesto aumenta
+        return Math.max(baseStarterBudget, currentTeamValue);
+    },
+
     getIntelligentProposal: function(mode = "balanced", riskTolerance = 0.5) {
         const race = this.getCurrentRace();
         if (this.isQualiStarted(race)) {
