@@ -25,8 +25,6 @@ const f1Calendar2026 = [
   { round: 23, gp: "Qatar", city: "Lusail", date: "2026-11-29", sprint: false, type: "Power" },
   { round: 24, gp: "Abu Dhabi", city: "Yas Marina", date: "2026-12-06", sprint: false, type: "Balanced" }
 ];
-
-// ========== RESULTADOS HISTÓRICOS DE GPs ==========
 const raceResults = {
   "Australia": {
     raceDate: "2026-03-08",
@@ -54,8 +52,6 @@ const raceResults = {
     analysis: "Dominio de Mercedes. Ferrari sólido. Red Bull con problemas de ritmo."
   }
 };
-
-// ========== AGENTE FIA Y MOTOR DE PROPUESTAS ==========
 const FIA_Agent = {
   name: "Comisario Fantasy Expert",
   assets: {
@@ -83,12 +79,10 @@ const FIA_Agent = {
       { id: "col", name: "Franco Colapinto", teamId: "alp", price: 6.8, reliability: 0.86 }
     ]
   },
-
   getCurrentRace: function() {
     const today = new Date();
     return f1Calendar2026.find(r => new Date(r.date) >= today) || f1Calendar2026[f1Calendar2026.length - 1];
   },
-
   getCurrentBudget: function() {
     const teamString = localStorage.getItem('f1Team');
     if (!teamString) return 100.0;
@@ -106,13 +100,11 @@ const FIA_Agent = {
       return Math.max(100.0, val);
     } catch(e) { return 100.0; }
   },
-
   getIntelligentProposal: function() {
     const currentRace = this.getCurrentRace();
     const prevRace = f1Calendar2026.find(r => r.round === currentRace.round - 1);
     const recent = prevRace ? raceResults[prevRace.gp] : null;
     const budget = this.getCurrentBudget();
-
     const getScore = (item, isC) => {
       let s = 50;
       if (isC && item.favored.includes(currentRace.type)) s += 20;
@@ -124,14 +116,11 @@ const FIA_Agent = {
       s += (20 / item.price) * 10;
       return s * (1 + (Math.random() - 0.5) * 0.1);
     };
-
     const sD = this.assets.drivers.map(d => ({...d, s: getScore(d, false)})).sort((a,b) => b.s - a.s);
     const sC = this.assets.constructors.map(c => ({...c, s: getScore(c, true)})).sort((a,b) => b.s - a.s);
-
     const comb = (a, n) => n === 1 ? a.map(e => [e]) : a.flatMap((e, i) => comb(a.slice(i+1), n-1).map(c => [e, ...c]));
     const allC = comb(sC, 2);
     const allD = comb(sD.slice(0, 8), 5);
-
     let teams = [];
     allC.forEach(c => {
       const cCost = c.reduce((sum, x) => sum + x.price, 0);
@@ -142,7 +131,6 @@ const FIA_Agent = {
         }
       });
     });
-
     teams.sort((a,b) => b.score - a.score);
     return teams.slice(0, 3).map((t, i) => ({
       rank: i+1,
@@ -154,12 +142,10 @@ const FIA_Agent = {
   }
 };
 
-// ========== UI Y EVENTOS ==========
 function updateUI() {
   const race = FIA_Agent.getCurrentRace();
   const info = document.getElementById('next-race-info');
   if (info) info.innerText = "🏁 PRÓXIMO: GP de " + race.gp + " (" + race.date + ")";
-
   const teamString = localStorage.getItem('f1Team');
   const display = document.getElementById('team-display');
   if (display) {
@@ -184,10 +170,9 @@ function updateUI() {
 document.addEventListener('DOMContentLoaded', () => {
   updateUI();
   renderCalendar();
-
   const modal = document.getElementById('team-modal');
   const text = document.getElementById('proposal-text');
-
+  
   document.getElementById('propose-team-btn')?.addEventListener('click', () => {
     modal.classList.add('active');
     text.innerHTML = '<p style="text-align:center; padding:20px;">Analizando datos...</p>';
@@ -195,28 +180,49 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
       const props = FIA_Agent.getIntelligentProposal();
       window.lastProps = props;
+      window.selectedProposalIndex = 0;
       
       let html = "<h4>Propuestas para " + props[0].race + "</h4>";
       props.forEach((p, i) => {
-        html += '<div style="background:#222; padding:15px; border-radius:10px; margin-bottom:15px; border:1px solid #333;">';
+        const isSelected = i === 0;
+        html += `<div class="proposal-card ${isSelected ? 'selected' : ''}" data-index="${i}" style="background:#222; padding:15px; border-radius:10px; margin-bottom:15px; cursor:pointer; position:relative;">`;
+        html += `<div style="position:absolute; right:15px; top:15px;"><input type="radio" name="proposal-radio" value="${i}" ${isSelected ? 'checked' : ''}></div>`;
         html += "<h5 style='color:#ff8c00; margin-bottom:8px;'>Opción " + p.rank + " (" + p.totalCost.toFixed(1) + "M)</h5>";
         html += "<p style='font-size:0.9rem; margin:5px 0; color:#ddd;'><b>C:</b> " + p.constructors.map(c => c.name).join(' + ') + "</p>";
         html += "<p style='font-size:0.9rem; margin:5px 0; color:#ddd;'><b>P:</b> " + p.drivers.map(d => d.name).join(', ') + "</p>";
+        html += `<button class="btn-copy-small" data-index="${i}" style="background:transparent; border:1px solid #444; color:#888; padding:4px 8px; border-radius:4px; font-size:0.75rem; margin-top:8px;">📋 Copiar</button>`;
         html += "</div>";
       });
-      html += '<button id="copy-btn-inline" class="btn-secondary" style="width:100%; margin-top:10px;">📋 Copiar Mejor Opción</button>';
       text.innerHTML = html;
-      
-      document.getElementById('copy-btn-inline')?.addEventListener('click', copyTeam);
+
+      document.querySelectorAll('.proposal-card').forEach(card => {
+        card.addEventListener('click', (e) => {
+          if (e.target.tagName === 'BUTTON') return;
+          const idx = parseInt(card.getAttribute('data-index'));
+          window.selectedProposalIndex = idx;
+          document.querySelectorAll('.proposal-card').forEach(c => c.classList.remove('selected'));
+          card.classList.add('selected');
+          const radio = card.querySelector('input');
+          if (radio) radio.checked = true;
+        });
+      });
+
+      document.querySelectorAll('.btn-copy-small').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          copyTeamByIndex(parseInt(btn.getAttribute('data-index')), btn);
+        });
+      });
     }, 800);
   });
 
   document.getElementById('close-modal')?.addEventListener('click', () => modal.classList.remove('active'));
   document.getElementById('cancel-modal-btn')?.addEventListener('click', () => modal.classList.remove('active'));
-
+  
   document.getElementById('confirm-changes-btn')?.addEventListener('click', () => {
     if (!window.lastProps || window.lastProps.length === 0) return;
-    const sel = window.lastProps[0];
+    const idx = window.selectedProposalIndex || 0;
+    const sel = window.lastProps[idx];
     const team = {
       pilotos: sel.drivers.map(d => d.name),
       constructores: sel.constructors.map(c => c.name)
@@ -227,14 +233,14 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-function copyTeam() {
-  if (!window.lastProps || window.lastProps.length === 0) return;
-  const p = window.lastProps[0];
+function copyTeamByIndex(idx, btn) {
+  if (!window.lastProps || !window.lastProps[idx]) return;
+  const p = window.lastProps[idx];
   const txt = p.drivers.map(d => d.name).join(', ') + " + " + p.constructors.map(c => c.name).join(', ');
   navigator.clipboard.writeText(txt).then(() => {
-    const btn = document.getElementById('copy-btn-inline');
-    if (btn) btn.innerText = "✅ Copiado";
-    setTimeout(() => { if (btn) btn.innerText = "📋 Copiar Mejor Opción"; }, 2000);
+    const oldText = btn.innerText;
+    btn.innerText = "✅ Copiado";
+    setTimeout(() => { if (btn) btn.innerText = oldText; }, 2000);
   });
 }
 
