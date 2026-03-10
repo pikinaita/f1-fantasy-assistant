@@ -26,59 +26,38 @@ const f1Calendar2026 = [
   { round: 24, gp: "Abu Dhabi", city: "Yas Marina", date: "2026-12-06", sprint: false, type: "Balanced" }
 ];
 
-// ========== RESULTADOS HISTORICOS DE GPs ==========
-// Se actualiza tras cada carrera con resultados reales
+// ========== RESULTADOS HISTÓRICOS DE GPs ==========
 const raceResults = {
   "Australia": {
     raceDate: "2026-03-08",
     winner: "George Russell",
     results: {
       drivers: [
-        { name: "George Russell", team: "Mercedes", position: 1, points: 25 },
-        { name: "Kimi Antonelli", team: "Mercedes", position: 2, points: 18 },
-        { name: "Charles Leclerc", team: "Ferrari", position: 3, points: 15 },
-        { name: "Lewis Hamilton", team: "Ferrari", position: 4, points: 12 },
-        { name: "Lando Norris", team: "McLaren", position: 5, points: 10 },
-        { name: "Max Verstappen", team: "Red Bull", position: 6, points: 8 },
-        { name: "Oliver Bearman", team: "Haas", position: 7, points: 6 },
-        { name: "Arvid Lindblad", team: "Racing Bulls", position: 8, points: 4 },
-        { name: "Gabriel Bortoleto", team: "Audi", position: 9, points: 2 },
-        { name: "Pierre Gasly", team: "Alpine", position: 10, points: 1 },
-        { name: "Esteban Ocon", team: "Haas", position: 11, points: 0 },
-        { name: "Alex Albon", team: "Williams", position: 12, points: 0 },
-        { name: "Liam Lawson", team: "Racing Bulls", position: 13, points: 0 },
-        { name: "Franco Colapinto", team: "Alpine", position: 14, points: 0 },
-        { name: "Carlos Sainz", team: "Williams", position: 15, points: 0 },
-        { name: "Sergio Perez", team: "Cadillac", position: 16, points: 0 },
-        { name: "Lance Stroll", team: "Aston Martin", status: "DNF", points: -5 },
-        { name: "Fernando Alonso", team: "Aston Martin", status: "DNF", points: -5 },
-        { name: "Valtteri Bottas", team: "Cadillac", status: "DNF", points: -5 },
-        { name: "Isack Hadjar", team: "Red Bull", status: "DNF", points: -5 },
-        { name: "Oscar Piastri", team: "McLaren", status: "DNF", points: -5 },
-        { name: "Nico Hulkenberg", team: "Audi", status: "DNF", points: -5 }
+        { name: "George Russell", team: "Mercedes", position: 1 },
+        { name: "Kimi Antonelli", team: "Mercedes", position: 2 },
+        { name: "Charles Leclerc", team: "Ferrari", position: 3 },
+        { name: "Lewis Hamilton", team: "Ferrari", position: 4 },
+        { name: "Lando Norris", team: "McLaren", position: 5 },
+        { name: "Max Verstappen", team: "Red Bull", position: 6 },
+        { name: "Oliver Bearman", team: "Haas", position: 7 },
+        { name: "Arvid Lindblad", team: "Racing Bulls", position: 8 },
+        { name: "Gabriel Bortoleto", team: "Audi", position: 9 },
+        { name: "Pierre Gasly", team: "Alpine", position: 10 }
       ],
       constructors: [
-        { name: "Mercedes", position: 1, points: 43 },
-        { name: "Ferrari", position: 2, points: 27 },
-        { name: "McLaren", position: 3, points: 10 },
-        { name: "Red Bull", position: 4, points: 8 },
-        { name: "Haas", position: 5, points: 6 },
-        { name: "Racing Bulls", position: 6, points: 4 },
-        { name: "Audi", position: 7, points: 2 },
-        { name: "Alpine", position: 8, points: 1 },
-        { name: "Aston Martin", position: 9, points: 0 },
-        { name: "Williams", position: 10, points: 0 },
-        { name: "Cadillac", position: 11, points: 0 }
+        { name: "Mercedes", position: 1 },
+        { name: "Ferrari", position: 2 },
+        { name: "McLaren", position: 3 },
+        { name: "Red Bull", position: 4 }
       ]
     },
-    analysis: "MERCEDES domina con doblete Russell-Antonelli. FERRARI 2º mejor equipo. RED BULL problemaático (Hadjar DNF, Verstappen recupera de P20 a P6). ASTON MARTIN y CADILLAC peores con DNFs."
+    analysis: "Dominio de Mercedes. Ferrari sólido. Red Bull con problemas de ritmo."
   }
 };
 
-// ========== BASE DE DATOS DE ACTIVOS F1 FANTASY ==========
+// ========== AGENTE FIA Y MOTOR DE PROPUESTAS ==========
 const FIA_Agent = {
   name: "Comisario Fantasy Expert",
-  lastUpdate: "2026-03-10",
   
   assets: {
     constructors: [
@@ -90,7 +69,6 @@ const FIA_Agent = {
       { id: "aud", name: "Audi", price: 17.5, reliability: 0.82, favored: ["Power"] },
       { id: "cad", name: "Cadillac", price: 12.0, reliability: 0.70, favored: ["Power"] }
     ],
-    
     drivers: [
       { id: "rus", name: "George Russell", teamId: "mer", price: 28.2, reliability: 0.98 },
       { id: "ant", name: "Kimi Antonelli", teamId: "mer", price: 19.1, reliability: 0.95 },
@@ -99,157 +77,114 @@ const FIA_Agent = {
       { id: "nor", name: "Lando Norris", teamId: "mcl", price: 21.4, reliability: 0.95 },
       { id: "pia", name: "Oscar Piastri", teamId: "mcl", price: 19.2, reliability: 0.90 },
       { id: "ver", name: "Max Verstappen", teamId: "rb", price: 30.5, reliability: 0.92 },
-      { id: "had", name: "Isack Hadjar", teamId: "rb", price: 8.2, reliability: 0.78 },
-      { id: "alo", name: "Fernando Alonso", teamId: "am", price: 9.5, reliability: 0.75 },
-      { id: "str", name: "Lance Stroll", teamId: "am", price: 7.6, reliability: 0.72 },
-      { id: "hul", name: "Nico Hulkenberg", teamId: "aud", price: 10.2, reliability: 0.85 },
-      { id: "bor", name: "Gabriel Bortoleto", teamId: "aud", price: 6.9, reliability: 0.88 },
-      { id: "per", name: "Sergio Perez", teamId: "cad", price: 5.8, reliability: 0.70 },
-      { id: "bot", name: "Valtteri Bottas", teamId: "cad", price: 5.5, reliability: 0.68 },
       { id: "sai", name: "Carlos Sainz", teamId: "wil", price: 15.2, reliability: 0.93 },
-      { id: "col", name: "Franco Colapinto", teamId: "alp", price: 6.8, reliability: 0.86 },
       { id: "bea", name: "Oliver Bearman", teamId: "haa", price: 7.5, reliability: 0.92 },
-      { id: "lin", name: "Arvid Lindblad", teamId: "vrb", price: 6.2, reliability: 0.90 }
+      { id: "lin", name: "Arvid Lindblad", teamId: "vrb", price: 6.2, reliability: 0.90 },
+      { id: "bor", name: "Gabriel Bortoleto", teamId: "aud", price: 6.9, reliability: 0.88 },
+      { id: "col", name: "Franco Colapinto", teamId: "alp", price: 6.8, reliability: 0.86 }
     ]
-  }  },
+  },
 
   getCurrentRace: function() {
     const today = new Date();
-    return f1Calendar2026.find(r => new Date(r.date) > today) || f1Calendar2026[0];
+    // Encuentra la primera carrera cuya fecha sea HOY o en el FUTURO
+    const race = f1Calendar2026.find(r => {
+      const raceDate = new Date(r.date);
+      raceDate.setHours(23, 59, 59); // Considerar todo el día de la carrera
+      return raceDate >= today;
+    });
+    return race || f1Calendar2026[f1Calendar2026.length - 1];
   },
 
   isQualiStarted: function(race) {
     const today = new Date();
-    const raceDay = new Date(race.date);
-    const dayDiff = (raceDay - today) / (1000 * 60 * 60 * 24);
-    return dayDiff < 1.1;
+    const raceDate = new Date(race.date);
+    // Bloquear si falta menos de 1 día para la carrera (aproximación a Quali)
+    return (raceDate - today) / (1000 * 60 * 60 * 24) < 1.0;
   },
 
   getCurrentBudget: function() {
-    const baseStarterBudget = 100.0;
-    if (!userTeam || !userTeam.constructores || !userTeam.pilotos) {
-      return baseStarterBudget;
-    }
-    let currentTeamValue = 0;
-    userTeam.constructores.forEach(cName => {
-      const c = this.assets.constructors.find(x => x.name === cName);
-      if (c) currentTeamValue += c.price;
+    let team = JSON.parse(localStorage.getItem('f1Team'));
+    if (!team || !team.pilotos) return 100.0;
+    
+    let value = 0;
+    team.constructores.forEach(name => {
+      const c = this.assets.constructors.find(x => x.name === name);
+      if (c) value += c.price;
     });
-    userTeam.pilotos.forEach(pName => {
-      const p = this.assets.drivers.find(x => x.name === pName);
-      if (p) currentTeamValue += p.price;
+    team.pilotos.forEach(name => {
+      const p = this.assets.drivers.find(x => x.name === name);
+      if (p) value += p.price;
     });
-    return Math.max(baseStarterBudget, currentTeamValue);
+    return Math.max(100.0, value);
   },
 
-  // ========== MOTOR DE ANALISIS DINAMICO ==========
-  getIntelligentProposal: function(mode = \"balanced\", riskTolerance = 0.5) {
+  getIntelligentProposal: function(mode, risk) {
     const currentRace = this.getCurrentRace();
-    if (this.isQualiStarted(currentRace)) {
-      return { error: true, message: \"¡VENTANA BLOQUEADA! Clasificación iniciada.\" };
-    }
-
-    // Identificar el GP anterior para analizar \"actualidad\"
-    const currentRound = currentRace.round;
-    const prevRace = f1Calendar2026.find(r => r.round === currentRound - 1);
-    const recentData = prevRace ? raceResults[prevRace.gp] : null;
-
-    let wPoints = 1.0, wMoney = 1.0, wTrend = 1.5;
-    if (mode === \"all-in\") { wPoints = 2.5; wMoney = 0.4; wTrend = 2.0; }
-    if (mode === \"budget\") { wPoints = 0.6; wMoney = 2.2; wTrend = 0.5; }
-
-    const getScore = (item, isConstructor) => {
-      // 1. Compatibilidad con el circuito actual
-      const circuitCompat = isConstructor ? (item.favored.includes(currentRace.type) ? 1.3 : 1.0) : 1.0;
-      
-      // 2. Rendimiento en el GP anterior (Actualidad)
-      let trendBonus = 1.0;
-      if (recentData) {
-        const list = isConstructor ? recentData.results.constructors : recentData.results.drivers;
-        const performance = list.find(x => x.name === item.name);
-        if (performance) {
-          if (performance.status === \"DNF\") trendBonus = 0.5; // Penalizar DNFs recientes
-          else if (performance.position <= 3) trendBonus = 1.4; // Bonus podio
-          else if (performance.position <= 10) trendBonus = 1.2; // Bonus puntos
-          else trendBonus = 0.9; // Mal resultado previo
-        }
-      }
-
-      // 3. Valor de mercado / PPM
-      const ppm = 10 / item.price; 
-      
-      // 4. Factor aleatorio controlado para diversidad
-      const randomFactor = (Math.random() - 0.5) * 0.15;
-
-      return (
-        (wPoints * circuitCompat * trendBonus * 50) +
-        (wMoney * ppm * 20) -
-        ((1 - item.reliability) * 30 * (1 - riskTolerance))
-      ) * (1 + randomFactor);
-    };
-
-    const scoredDrivers = this.assets.drivers.map(d => ({ ...d, score: getScore(d, false) })).sort((a, b) => b.score - a.score);
-    const scoredConstructors = this.assets.constructors.map(c => ({ ...c, score: getScore(c, true) })).sort((a, b) => b.score - a.score);
-
-    const getCombinations = (arr, size) => {
-      if (size === 1) return arr.map(el => [el]);
-      return arr.flatMap((el, i) => getCombinations(arr.slice(i + 1), size - 1).map(comb => [el, ...comb]));
-    };
-
-    const allConstructorPairs = getCombinations(scoredConstructors, 2);
-    const allDriverGroups = getCombinations(scoredDrivers.slice(0, 10), 5); // Optimizar búsqueda
-
-    let top3Teams = [];
+    const prevRace = f1Calendar2026.find(r => r.round === currentRace.round - 1);
+    const recent = prevRace ? raceResults[prevRace.gp] : null;
     const budget = this.getCurrentBudget();
 
-    for (const constructors of allConstructorPairs) {
-      for (const drivers of allDriverGroups) {
-        const cost = constructors.reduce((s, c) => s + c.price, 0) + drivers.reduce((s, d) => s + d.price, 0);
-        if (cost <= budget) {
-          const score = constructors.reduce((s, c) => s + c.score, 0) + drivers.reduce((s, d) => s + d.score, 0);
-          top3Teams.push({ constructors, drivers, cost, score });
-          top3Teams.sort((a, b) => b.score - a.score);
-          if (top3Teams.length > 3) top3Teams = top3Teams.slice(0, 3);
-        }
+    const getScore = (item, isC) => {
+      let s = 50;
+      if (isC && item.favored.includes(currentRace.type)) s += 20;
+      if (recent) {
+        const list = isC ? recent.results.constructors : recent.results.drivers;
+        const perf = list.find(x => x.name === item.name);
+        if (perf) s += (20 - perf.position * 2);
       }
-    }
-
-    if (top3Teams.length === 0) return { error: true, message: \"No caben equipos en el presupuesto actual.\" };
-
-    return {
-      proposals: top3Teams.map((t, i) => ({
-        rank: i + 1,
-        race: currentRace.gp,
-        mode: mode,
-        totalCost: t.cost,
-        score: t.score,
-        constructors: t.constructors,
-        drivers: t.drivers,
-        reasoning: recentData ? `Basado en el éxito de ${recentData.winner} en ${recentData.raceDate}.` : \"Datos de pretemporada.\"
-      }))
+      s += (20 / item.price) * 10;
+      return s * (1 + (Math.random() - 0.5) * 0.1);
     };
+
+    const sD = this.assets.drivers.map(d => ({...d, s: getScore(d, false)})).sort((a,b) => b.s - a.s);
+    const sC = this.assets.constructors.map(c => ({...c, s: getScore(c, true)})).sort((a,b) => b.s - a.s);
+
+    const comb = (a, n) => n === 1 ? a.map(e => [e]) : a.flatMap((e, i) => comb(a.slice(i+1), n-1).map(c => [e, ...c]));
+    
+    const allC = comb(sC, 2);
+    const allD = comb(sD.slice(0, 8), 5);
+
+    let teams = [];
+    allC.forEach(c => {
+      allD.forEach(d => {
+        const cost = c.reduce((a,b) => a+b.price,0) + d.reduce((a,b) => a+b.price,0);
+        if (cost <= budget) {
+          teams.push({c, d, cost, score: c.reduce((a,b) => a+b.s,0) + d.reduce((a,b) => a+b.s,0)});
+        }
+      });
+    });
+
+    teams.sort((a,b) => b.score - a.score);
+    return teams.slice(0, 3).map((t, i) => ({
+      rank: i+1,
+      race: currentRace.gp,
+      totalCost: t.cost,
+      score: t.score,
+      constructors: t.c,
+      drivers: t.d,
+      reasoning: recent ? `Basado en resultados de ${recent.winner} en ${prevRace.gp}.` : "Análisis de pretemporada."
+    }));
   }
 };
 
-// ========== LÓGICA DE INTERFAZ (UI) ==========
-let userTeam = JSON.parse(localStorage.getItem('f1Team')) || null;
-
+// ========== UI Y EVENTOS ==========
 function updateUI() {
-  const display = document.getElementById('team-display');
-  const info = document.getElementById('next-race-info');
   const race = FIA_Agent.getCurrentRace();
-  
-  if (info) info.innerHTML = `**PROXIMO GP: ${race.gp}** (${race.type}) | ${race.date}`;
+  const info = document.getElementById('next-race-info');
+  if (info) info.innerHTML = `🏁 PRÓXIMO: GP de ${race.gp} (${race.date})`;
 
+  const team = JSON.parse(localStorage.getItem('f1Team'));
+  const display = document.getElementById('team-display');
   if (display) {
-    if (!userTeam) {
-      display.innerHTML = '<p>No tienes equipo guardado. ¡Genera una propuesta!</p>';
-    } else {
-      let html = '<div class=\"current-team-grid\">';
-      userTeam.constructores.forEach(c => html += `<div class=\"asset-card constructor\"><b>[C] ${c}</b></div>`);
-      userTeam.pilotos.forEach(p => html += `<div class=\"asset-card driver\">${p}</div>`);
-      html += '</div>';
-      display.innerHTML = html;
+    if (!team) display.innerHTML = "<p>Sin equipo. Genera una propuesta.</p>";
+    else {
+      display.innerHTML = `
+        <div class="team-grid">
+          ${team.constructores.map(c => `<div class="card"><b>[C] ${c}</b></div>`).join('')}
+          ${team.pilotos.map(p => `<div class="card">${p}</div>`).join('')}
+        </div>
+      `;
     }
   }
 }
@@ -259,73 +194,52 @@ document.addEventListener('DOMContentLoaded', () => {
   renderCalendar();
 
   document.getElementById('propose-team-btn')?.addEventListener('click', () => {
-    const mode = document.getElementById('strategy-mode').value;
-    const risk = document.getElementById('risk-slider').value;
-    const text = document.getElementById('proposal-text');
     const modal = document.getElementById('team-modal');
-
+    const text = document.getElementById('proposal-text');
     modal.classList.add('active');
-    text.innerHTML = \"Analizando resultados del GP anterior y telemetría actual...\";
+    text.innerHTML = "Analizando datos...";
 
     setTimeout(() => {
-      const p = FIA_Agent.getIntelligentProposal(mode, parseFloat(risk));
-      if (p.error) {
-        text.innerHTML = `<p class=\"error\">${p.message}</p>`;
-      } else {
-        let html = `<h4>Propuestas Estratégicas: GP de ${p.proposals[0].race}</h4>`;
-        html += `<p class=\"analysis-box\"><i>${p.proposals[0].reasoning}</i></p>`;
-        
-        p.proposals.forEach((prop, idx) => {
-          const recommended = idx === 0 ? \"★ RECOMENDADA\" : \"\";
-          html += \`
-            <div class=\"proposal-card ${idx === 0 ? 'top-choice' : ''}\" onclick=\"window.selectedProposalIndex=${idx}\">
-              <div class=\"prop-header\"><b>Opción ${prop.rank} ${recommended}</b></div>
-              <p><b>Coste:</b> $${prop.totalCost.toFixed(1)}M | <b>Score IA:</b> ${prop.score.toFixed(0)}</p>
-              <p><b>Constructores:</b> ${prop.constructors.map(c => c.name).join(' + ')}</p>
-              <p><b>Pilotos:</b> ${prop.drivers.map(d => d.name).join(', ')}</p>
-              <button class=\"copy-btn\" onclick=\"copyToClipboard('${prop.drivers.map(d => d.name).join(', ')} + ${prop.constructors.map(c => c.name).join(', ')}')\">📋 Copiar Equipo</button>
-            </div>
-          \`;
-        });
-
-        html += `<hr><a href=\"https://fantasy.formula1.com\" target=\"_blank\" class=\"f1-link\">🚀 ABRIR F1 FANTASY OFICIAL</a>`;
-        text.innerHTML = html;
-        window.lastProposals = p.proposals;
-        window.selectedProposalIndex = 0;
-      }
-    }, 1200);
+      const props = FIA_Agent.getIntelligentProposal();
+      let html = `<h3>Propuestas para ${props[0].race}</h3>`;
+      props.forEach((p, i) => {
+        html += `
+          <div class="proposal-card" onclick="window.selIdx=${i}">
+            <b>Opción ${p.rank}</b> ($${p.totalCost.toFixed(1)}M)<br>
+            C: ${p.constructors.map(c => c.name).join(' + ')}<br>
+            P: ${p.drivers.map(d => d.name).join(', ')}
+          </div>
+        `;
+      });
+      text.innerHTML = html + '<br><button onclick="copyTeam()">📋 Copiar</button>';
+      window.lastProps = props;
+    }, 1000);
   });
 
   document.getElementById('confirm-changes-btn')?.addEventListener('click', () => {
-    if (window.lastProposals) {
-      const sel = window.lastProposals[window.selectedProposalIndex];
-      userTeam = {
-        pilotos: sel.drivers.map(d => d.name),
-        constructores: sel.constructors.map(c => c.name),
-        date: new Date().toISOString()
-      };
-      localStorage.setItem('f1Team', JSON.stringify(userTeam));
-      updateUI();
-      document.getElementById('team-modal').classList.remove('active');
-      alert(\"¡Equipo actualizado correctamente!\");
-    }
+    const sel = window.lastProps[window.selIdx || 0];
+    const team = {
+      pilotos: sel.drivers.map(d => d.name),
+      constructores: sel.constructors.map(c => c.name)
+    };
+    localStorage.setItem('f1Team', JSON.stringify(team));
+    updateUI();
+    document.getElementById('team-modal').classList.remove('active');
   });
-
-  document.getElementById('close-modal')?.addEventListener('click', () => document.getElementById('team-modal').classList.remove('active'));
 });
 
-function copyToClipboard(text) {
-  navigator.clipboard.writeText(text).then(() => alert(\"Equipo copiado al portapapeles. Pégalo en F1 Fantasy.\"));
+function copyTeam() {
+  const p = window.lastProps[window.selIdx || 0];
+  const txt = `${p.drivers.map(d => d.name).join(', ')} + ${p.constructors.map(c => c.name).join(', ')}`;
+  navigator.clipboard.writeText(txt).then(() => alert("Copiado"));
 }
 
 function renderCalendar() {
   const body = document.getElementById('calendar-body');
   if (!body) return;
-  const today = new Date();
-  f1Calendar2026.forEach(race => {
-    const row = document.createElement('tr');
-    const isPast = new Date(race.date) < today;
-    row.innerHTML = `<td>${race.round}</td><td>${race.gp}</td><td>${race.city}</td><td>${race.date}</td><td>${isPast ? '✅' : '⏳'}</td>`;
-    body.appendChild(row);
+  f1Calendar2026.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${r.round}</td><td>${r.gp}</td><td>${r.date}</td>`;
+    body.appendChild(tr);
   });
 }
