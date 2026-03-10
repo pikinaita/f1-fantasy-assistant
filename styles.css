@@ -47,6 +47,12 @@ main {
   flex-direction: column;
   gap: 1.25rem;
 }
+.proposal-card { transition: all 0.2s; border: 1px solid #333 !important; }
+.proposal-card:hover { border-color: #555 !important; background: #282828 !important; }
+.proposal-card.selected { border-color: var(--f1-red) !important; background: rgba(225, 6, 0, 0.05) !important; }
+.btn-copy-small { transition: all 0.2s; }
+.btn-copy-small:hover { border-color: var(--f1-accent) !important; color: var(--f1-accent) !important; }
+
 .card {
   background: var(--f1-card);
   border: 1px solid var(--f1-border);
