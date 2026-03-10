@@ -6,7 +6,7 @@
     <title>F1 Fantasy Assistant 2026</title>
     <link rel="manifest" href="manifest.json" />
     <meta name="theme-color" content="#e10600" />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css?v=1.1" />
 </head>
 <body>
     <header>
@@ -18,14 +18,12 @@
             </div>
         </div>
     </header>
-
     <main>
         <section class="card">
             <h2>Próximo Evento</h2>
             <div id="next-race-info">Cargando datos del circuito...</div>
             <div id="quali-lock-status" style="margin-top: 10px; font-weight: bold;"></div>
         </section>
-
         <section class="card">
             <h2>Configuración de Estrategia</h2>
             <div class="form-group">
@@ -36,7 +34,6 @@
                     <option value="budget">Build Budget (Incrementar Capital)</option>
                 </select>
             </div>
-
             <div class="form-group" style="margin-top: 15px;">
                 <label for="risk-slider">Tolerancia al Riesgo (Fiabilidad/Mecánica):</label>
                 <input type="range" id="risk-slider" min="0" max="1" step="0.1" value="0.5" style="width: 100%;">
@@ -45,17 +42,14 @@
                     <span>Agresivo (Riesgo)</span>
                 </div>
             </div>
-
             <button id="propose-team-btn" class="btn-primary" style="width: 100%; margin-top: 20px;">
                 Generar Propuesta Inteligente
             </button>
         </section>
-
         <section class="card">
             <h2>Mi Equipo Actual (Simulación 2026)</h2>
             <div id="team-display"></div>
         </section>
-
         <section class="card">
             <h2>Calendario Oficial 2026</h2>
             <div class="table-wrapper">
@@ -89,6 +83,6 @@
         </div>
     </div>
 
-    <script src="app.js"></script>
+    <script src="app.js?v=1.1"></script>
 </body>
 </html>
