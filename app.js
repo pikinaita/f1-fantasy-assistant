@@ -58,7 +58,6 @@ const raceResults = {
 // ========== AGENTE FIA Y MOTOR DE PROPUESTAS ==========
 const FIA_Agent = {
   name: "Comisario Fantasy Expert",
-  
   assets: {
     constructors: [
       { id: "mer", name: "Mercedes", price: 22.3, reliability: 0.98, favored: ["Balanced", "Aero"] },
@@ -87,39 +86,28 @@ const FIA_Agent = {
 
   getCurrentRace: function() {
     const today = new Date();
-    // Encuentra la primera carrera cuya fecha sea HOY o en el FUTURO
-    const race = f1Calendar2026.find(r => {
-      const raceDate = new Date(r.date);
-      raceDate.setHours(23, 59, 59); // Considerar todo el día de la carrera
-      return raceDate >= today;
-    });
-    return race || f1Calendar2026[f1Calendar2026.length - 1];
-  },
-
-  isQualiStarted: function(race) {
-    const today = new Date();
-    const raceDate = new Date(race.date);
-    // Bloquear si falta menos de 1 día para la carrera (aproximación a Quali)
-    return (raceDate - today) / (1000 * 60 * 60 * 24) < 1.0;
+    return f1Calendar2026.find(r => new Date(r.date) >= today) || f1Calendar2026[f1Calendar2026.length - 1];
   },
 
   getCurrentBudget: function() {
-    let team = JSON.parse(localStorage.getItem('f1Team'));
-    if (!team || !team.pilotos) return 100.0;
-    
-    let value = 0;
-    team.constructores.forEach(name => {
-      const c = this.assets.constructors.find(x => x.name === name);
-      if (c) value += c.price;
-    });
-    team.pilotos.forEach(name => {
-      const p = this.assets.drivers.find(x => x.name === name);
-      if (p) value += p.price;
-    });
-    return Math.max(100.0, value);
+    const teamString = localStorage.getItem('f1Team');
+    if (!teamString) return 100.0;
+    try {
+      const team = JSON.parse(teamString);
+      let val = 0;
+      (team.constructores || []).forEach(n => {
+        const c = this.assets.constructors.find(x => x.name === n);
+        if (c) val += c.price;
+      });
+      (team.pilotos || []).forEach(n => {
+        const p = this.assets.drivers.find(x => x.name === n);
+        if (p) val += p.price;
+      });
+      return Math.max(100.0, val);
+    } catch(e) { return 100.0; }
   },
 
-  getIntelligentProposal: function(mode, risk) {
+  getIntelligentProposal: function() {
     const currentRace = this.getCurrentRace();
     const prevRace = f1Calendar2026.find(r => r.round === currentRace.round - 1);
     const recent = prevRace ? raceResults[prevRace.gp] : null;
@@ -141,14 +129,14 @@ const FIA_Agent = {
     const sC = this.assets.constructors.map(c => ({...c, s: getScore(c, true)})).sort((a,b) => b.s - a.s);
 
     const comb = (a, n) => n === 1 ? a.map(e => [e]) : a.flatMap((e, i) => comb(a.slice(i+1), n-1).map(c => [e, ...c]));
-    
     const allC = comb(sC, 2);
     const allD = comb(sD.slice(0, 8), 5);
 
     let teams = [];
     allC.forEach(c => {
+      const cCost = c.reduce((sum, x) => sum + x.price, 0);
       allD.forEach(d => {
-        const cost = c.reduce((a,b) => a+b.price,0) + d.reduce((a,b) => a+b.price,0);
+        const cost = cCost + d.reduce((sum, x) => sum + x.price, 0);
         if (cost <= budget) {
           teams.push({c, d, cost, score: c.reduce((a,b) => a+b.s,0) + d.reduce((a,b) => a+b.s,0)});
         }
@@ -160,10 +148,8 @@ const FIA_Agent = {
       rank: i+1,
       race: currentRace.gp,
       totalCost: t.cost,
-      score: t.score,
       constructors: t.c,
-      drivers: t.d,
-      reasoning: recent ? `Basado en resultados de ${recent.winner} en ${prevRace.gp}.` : "Análisis de pretemporada."
+      drivers: t.d
     }));
   }
 };
@@ -172,19 +158,25 @@ const FIA_Agent = {
 function updateUI() {
   const race = FIA_Agent.getCurrentRace();
   const info = document.getElementById('next-race-info');
-  if (info) info.innerHTML = `🏁 PRÓXIMO: GP de ${race.gp} (${race.date})`;
+  if (info) info.innerText = "🏁 PRÓXIMO: GP de " + race.gp + " (" + race.date + ")";
 
-  const team = JSON.parse(localStorage.getItem('f1Team'));
+  const teamString = localStorage.getItem('f1Team');
   const display = document.getElementById('team-display');
   if (display) {
-    if (!team) display.innerHTML = "<p>Sin equipo. Genera una propuesta.</p>";
-    else {
-      display.innerHTML = `
-        <div class="team-grid">
-          ${team.constructores.map(c => `<div class="card"><b>[C] ${c}</b></div>`).join('')}
-          ${team.pilotos.map(p => `<div class="card">${p}</div>`).join('')}
-        </div>
-      `;
+    if (!teamString) {
+      display.innerHTML = '<p style="color:#888; padding:20px; text-align:center;">Sin equipo. Genera una propuesta.</p>';
+    } else {
+      try {
+        const team = JSON.parse(teamString);
+        let html = "";
+        (team.constructores || []).forEach(c => {
+          html += '<div style="background:#222; margin-bottom:10px; padding:12px; border-radius:10px; border-left:4px solid #e10600;"><b>[C] ' + c + '</b></div>';
+        });
+        (team.pilotos || []).forEach(p => {
+          html += '<div style="background:#222; margin-bottom:10px; padding:12px; border-radius:10px; border:1px solid #333;">' + p + '</div>';
+        });
+        display.innerHTML = html;
+      } catch(e) { display.innerHTML = "Error al cargar equipo."; }
     }
   }
 }
@@ -193,53 +185,66 @@ document.addEventListener('DOMContentLoaded', () => {
   updateUI();
   renderCalendar();
 
-  document.getElementById('propose-team-btn')?.addEventListener('click', () => {
-    const modal = document.getElementById('team-modal');
-    const text = document.getElementById('proposal-text');
-    modal.classList.add('active');
-    text.innerHTML = "Analizando datos...";
+  const modal = document.getElementById('team-modal');
+  const text = document.getElementById('proposal-text');
 
+  document.getElementById('propose-team-btn')?.addEventListener('click', () => {
+    modal.classList.add('active');
+    text.innerHTML = '<p style="text-align:center; padding:20px;">Analizando datos...</p>';
+    
     setTimeout(() => {
       const props = FIA_Agent.getIntelligentProposal();
-      let html = `<h3>Propuestas para ${props[0].race}</h3>`;
-      props.forEach((p, i) => {
-        html += `
-          <div class="proposal-card" onclick="window.selIdx=${i}">
-            <b>Opción ${p.rank}</b> ($${p.totalCost.toFixed(1)}M)<br>
-            C: ${p.constructors.map(c => c.name).join(' + ')}<br>
-            P: ${p.drivers.map(d => d.name).join(', ')}
-          </div>
-        `;
-      });
-      text.innerHTML = html + '<br><button onclick="copyTeam()">📋 Copiar</button>';
       window.lastProps = props;
-    }, 1000);
+      
+      let html = "<h4>Propuestas para " + props[0].race + "</h4>";
+      props.forEach((p, i) => {
+        html += '<div style="background:#222; padding:15px; border-radius:10px; margin-bottom:15px; border:1px solid #333;">';
+        html += "<h5 style='color:#ff8c00; margin-bottom:8px;'>Opción " + p.rank + " (" + p.totalCost.toFixed(1) + "M)</h5>";
+        html += "<p style='font-size:0.9rem; margin:5px 0; color:#ddd;'><b>C:</b> " + p.constructors.map(c => c.name).join(' + ') + "</p>";
+        html += "<p style='font-size:0.9rem; margin:5px 0; color:#ddd;'><b>P:</b> " + p.drivers.map(d => d.name).join(', ') + "</p>";
+        html += "</div>";
+      });
+      html += '<button id="copy-btn-inline" class="btn-secondary" style="width:100%; margin-top:10px;">📋 Copiar Mejor Opción</button>';
+      text.innerHTML = html;
+      
+      document.getElementById('copy-btn-inline')?.addEventListener('click', copyTeam);
+    }, 800);
   });
 
+  document.getElementById('close-modal')?.addEventListener('click', () => modal.classList.remove('active'));
+  document.getElementById('cancel-modal-btn')?.addEventListener('click', () => modal.classList.remove('active'));
+
   document.getElementById('confirm-changes-btn')?.addEventListener('click', () => {
-    const sel = window.lastProps[window.selIdx || 0];
+    if (!window.lastProps || window.lastProps.length === 0) return;
+    const sel = window.lastProps[0];
     const team = {
       pilotos: sel.drivers.map(d => d.name),
       constructores: sel.constructors.map(c => c.name)
     };
     localStorage.setItem('f1Team', JSON.stringify(team));
     updateUI();
-    document.getElementById('team-modal').classList.remove('active');
+    modal.classList.remove('active');
   });
 });
 
 function copyTeam() {
-  const p = window.lastProps[window.selIdx || 0];
-  const txt = `${p.drivers.map(d => d.name).join(', ')} + ${p.constructors.map(c => c.name).join(', ')}`;
-  navigator.clipboard.writeText(txt).then(() => alert("Copiado"));
+  if (!window.lastProps || window.lastProps.length === 0) return;
+  const p = window.lastProps[0];
+  const txt = p.drivers.map(d => d.name).join(', ') + " + " + p.constructors.map(c => c.name).join(', ');
+  navigator.clipboard.writeText(txt).then(() => {
+    const btn = document.getElementById('copy-btn-inline');
+    if (btn) btn.innerText = "✅ Copiado";
+    setTimeout(() => { if (btn) btn.innerText = "📋 Copiar Mejor Opción"; }, 2000);
+  });
 }
 
 function renderCalendar() {
   const body = document.getElementById('calendar-body');
   if (!body) return;
+  body.innerHTML = "";
   f1Calendar2026.forEach(r => {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${r.round}</td><td>${r.gp}</td><td>${r.date}</td>`;
+    tr.innerHTML = "<td>" + r.round + "</td><td>" + r.gp + "</td><td>" + r.city + "</td><td>" + r.date + "</td><td>" + (r.sprint ? 'S' : '-') + "</td><td>Confirmado</td>";
     body.appendChild(tr);
   });
 }
